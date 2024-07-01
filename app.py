@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, QSlider, QCheckBox, QFileDialog, QApplication
+from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, QSlider, \
+    QCheckBox, QFileDialog
 from PyQt6.QtCore import QSettings, QThread, Qt
 import minecraft_launcher_lib
 import subprocess
@@ -35,14 +36,17 @@ class Launcher(QThread):
                     break
 
             if tramp:
-                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'launch\\1.5l')
+                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft',
+                                                                                                     'launch\\1.5l')
             else:
-                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft', 'launch\\1.5h')
+                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft',
+                                                                                                     'launch\\1.5h')
 
         file = file_work.FileLog(version=version)
 
         if file.read():
-            minecraft_launcher_lib.install.install_minecraft_version(versionid=version, minecraft_directory=minecraft_directory)
+            minecraft_launcher_lib.install.install_minecraft_version(versionid=version,
+                                                                     minecraft_directory=minecraft_directory)
             file.write()
 
         if version == '1.16.5':
@@ -52,12 +56,16 @@ class Launcher(QThread):
             options['jvmArguments'].append('-Dminecraft.api.session.host=https://invalid.invalid/')
             options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
 
-        command = minecraft_launcher_lib.command.get_minecraft_command(version=version, minecraft_directory=minecraft_directory, options=options)
+        command = minecraft_launcher_lib.command.get_minecraft_command(version=version,
+                                                                       minecraft_directory=minecraft_directory,
+                                                                       options=options)
 
         if settings['console']:
             subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
             subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
+
+        options['jvmArguments'] = []
 
 
 class MainWindow(QWidget):
