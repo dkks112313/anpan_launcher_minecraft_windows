@@ -24,4 +24,4 @@ class FileLog:
 
 class SaveFile:
     def __init__(self):
-        pass
+        print("Kuk")
