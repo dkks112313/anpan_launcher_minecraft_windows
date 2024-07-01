@@ -119,7 +119,7 @@ class MainWindow(QWidget):
         self.alpha_checkbox.stateChanged.connect(self.update_version_list)
 
         self.load_settings()
-        self.update_version_list()  # Инициализируем список версий при загрузке настроек
+        self.update_version_list()
 
         bottom_layout = QHBoxLayout()
         bottom_layout.addWidget(QLabel("Version:"))
