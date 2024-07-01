@@ -115,8 +115,11 @@ class MainWindow(QWidget):
         self.launch_button.clicked.connect(self.launch_minecraft)
         self.settings_button.clicked.connect(self.show_settings)
 
-        for i in minecraft_launcher_lib.utils.get_version_list():
-            self.version_select.addItem(i["id"])
+        self.snapshot_checkbox.stateChanged.connect(self.update_version_list)
+        self.alpha_checkbox.stateChanged.connect(self.update_version_list)
+
+        self.load_settings()
+        self.update_version_list()  # Инициализируем список версий при загрузке настроек
 
         bottom_layout = QHBoxLayout()
         bottom_layout.addWidget(QLabel("Version:"))
@@ -141,6 +144,27 @@ class MainWindow(QWidget):
         self.settings_interface.setVisible(False)
 
         self.init_settings_interface()
+
+    def update_version_list(self):
+        self.version_select.clear()
+        alpha = self.alpha_checkbox.isChecked()
+        snapshot = self.snapshot_checkbox.isChecked()
+
+        if alpha and snapshot:
+            for version_info in minecraft_launcher_lib.utils.get_version_list():
+                self.version_select.addItem(version_info["id"])
+        elif alpha:
+            for version_info in minecraft_launcher_lib.utils.get_version_list():
+                if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
+                    self.version_select.addItem(version_info['id'])
+        elif snapshot:
+            for version_info in minecraft_launcher_lib.utils.get_version_list():
+                if version_info['type'] in ['snapshot', 'release']:
+                    self.version_select.addItem(version_info['id'])
+        else:
+            for version_info in minecraft_launcher_lib.utils.get_version_list():
+                if version_info['type'] in ['release']:
+                    self.version_select.addItem(version_info["id"])
 
     def init_settings_interface(self):
         settings_layout = QVBoxLayout()
