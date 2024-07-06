@@ -1,9 +1,13 @@
+from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, QSlider, \
     QCheckBox, QFileDialog
 from PyQt6.QtCore import QSettings, QThread, Qt
 import minecraft_launcher_lib
 import subprocess
 import file_work
+import os
+
+import request
 
 version = ''
 options = {
@@ -13,41 +17,44 @@ options = {
     'jvmArguments': []
 }
 settings = {
-    'snapshoot': bool(),
+    'snapshot': bool(),
     'alpha': bool(),
     'console': bool(),
     'data': bool(),
     'license': bool(),
 }
 minecraft_directory = ''
+number_require = 1
 
 
 class Launcher(QThread):
     def run(self):
+        global number_require
         global minecraft_directory
+
+        if settings['data']:
+            request.on_start()
+            number_require -= request.number_require
+            settings['data'] = False
+
         if options['username'] == '':
             return
 
+        appdata = os.getenv('APPDATA')
+        os.makedirs(os.path.join(appdata, '.launch'), exist_ok=True)
+
         if minecraft_directory == '':
-            tramp = False
-            for i in minecraft_launcher_lib.utils.get_version_list()[678:]:
-                if i['id'] == version:
-                    tramp = True
-                    break
+            os.makedirs(os.path.join(appdata, '.launch\\', version), exist_ok=True)
+            minecraft_directory = os.path.join(appdata, '.launch\\', version)
+        else:
+            minecraft_directory += f'\\{version}'
 
-            if tramp:
-                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft',
-                                                                                                     'launch\\1.5l')
-            else:
-                minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory().replace('minecraft',
-                                                                                                     'launch\\1.5h')
+        file = file_work.FileLog(minecraft_directory=minecraft_directory)
 
-        file = file_work.FileLog(version=version)
-
-        if file.read():
+        if file.read_version():
+            file.write_version()
             minecraft_launcher_lib.install.install_minecraft_version(versionid=version,
                                                                      minecraft_directory=minecraft_directory)
-            file.write()
 
         if version == '1.16.5':
             options['jvmArguments'].append('-Dminecraft.api.env=custom')
@@ -85,6 +92,8 @@ class MainWindow(QWidget):
         self.version_select = QComboBox()
         self.username_edit = QLineEdit()
         self.ram_box = QLineEdit()
+        validator = QIntValidator()
+        self.ram_box.setValidator(validator)
         self.launcher = Launcher()
 
         self.settings = QSettings("MyCompany", "MyApp")
@@ -173,10 +182,13 @@ class MainWindow(QWidget):
         path_label = QLabel("Path")
         path_choice = QPushButton("Choice")
         path_choice.clicked.connect(self.select_directory)
+        default_button = QPushButton("Default")
+        default_button.clicked.connect(self.default_directory)
 
         path.addWidget(path_label)
         path.addWidget(self.path_box)
         path.addWidget(path_choice)
+        path.addWidget(default_button)
 
         ram = QHBoxLayout()
         ram_slider_label = QLabel(f"RAM: {self.ram_slider.value()}")
@@ -262,6 +274,12 @@ class MainWindow(QWidget):
         if directory:
             self.path_box.setText(directory)
 
+    def default_directory(self):
+        global minecraft_directory
+        os.makedirs(os.path.join(os.getenv('APPDATA'), '.launch'), exist_ok=True)
+        minecraft_directory = os.path.join(os.getenv('APPDATA'), '.launch')
+        self.path_box.setText(minecraft_directory)
+
     def load_settings(self):
         self.username_edit.setText(self.settings.value("username", ""))
         self.version_select.setCurrentText(self.settings.value("version", "latest"))
@@ -269,7 +287,7 @@ class MainWindow(QWidget):
         self.ram_box.setText(self.settings.value("ram", ""))
         self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", "False") == "True")
         self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
-        self.path_box.setText(self.settings.value("directory", "No directory selected"))
+        self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
         self.console_checkbox.setChecked(self.settings.value("console_checkbox", "False") == "True")
         self.license_checkbox.setChecked(self.settings.value("license_checkbox", "False") == "True")
         self.data_checkbox.setChecked(self.settings.value("data_checkbox", "False") == "True")
@@ -289,21 +307,36 @@ class MainWindow(QWidget):
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
     def closeEvent(self, event):
+        with open('version', 'w', encoding='utf-8') as file:
+            file.truncate(0)
+        if number_require == 0:
+            request.on_close()
         event.accept()
 
     def launch_minecraft(self):
         global version
+        global minecraft_directory
         version = self.version_select.currentText()
         options["username"] = self.username_edit.text()
+
+        if self.path_box.text() != os.path.join(os.getenv('APPDATA'), '.launch'):
+            minecraft_directory = self.path_box.text()
+        else:
+            minecraft_directory = os.path.join(os.getenv('APPDATA'), '.launch')
 
         if self.jvm_box.text():
             for arg in self.jvm_box.text().split(" "):
                 options['jvmArguments'].append(arg)
 
+        ram = int(self.ram_box.text())
+        options['jvmArguments'].append(f'-Xmx{ram}M')
+
         settings['console'] = self.console_checkbox.isChecked()
         settings['alpha'] = self.alpha_checkbox.isChecked()
-        settings['snapshoot'] = self.snapshot_checkbox.isChecked()
+        settings['snapshot'] = self.snapshot_checkbox.isChecked()
         settings['data'] = self.data_checkbox.isChecked()
         settings['license'] = self.license_checkbox.isChecked()
 
+        self.launcher.quit()
+        self.launcher.wait()
         self.launcher.start()
