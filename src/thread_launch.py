@@ -2,8 +2,8 @@ import os
 import subprocess
 import minecraft_launcher_lib
 from PyQt6.QtCore import QThread
-import file_work
-from env import *
+from src import file_work
+from src.env import *
 
 
 class Launcher(QThread):
@@ -35,7 +35,8 @@ class Launcher(QThread):
             options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
 
         command = minecraft_launcher_lib.command.get_minecraft_command(version=settings['version'],
-                                                                       minecraft_directory=settings['minecraft_directory'],
+                                                                       minecraft_directory=
+                                                                       settings['minecraft_directory'],
                                                                        options=options)
 
         if settings['console']:

@@ -1,13 +1,13 @@
 from PyQt6.QtGui import QIntValidator, QPixmap
-from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, QSlider, \
+from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog
 from PyQt6.QtCore import QSettings, Qt
-import random_tablet
+from src.random_tablet import random_image
 import minecraft_launcher_lib
 import os
-from env import *
-import request
-from thread_launch import Launcher
+from src.env import *
+from src import request
+from src.thread_launch import Launcher
 
 
 class MainWindow(QWidget):
@@ -22,11 +22,9 @@ class MainWindow(QWidget):
         self.main_interface_layout = None
         self.data_checkbox = QCheckBox()
         self.alpha_checkbox = QCheckBox()
-        self.ram_slider = QSlider(Qt.Orientation.Horizontal)
-        self.ram_slider.setMinimum(1)
-        self.ram_slider.setMaximum(32)
         self.snapshot_checkbox = QCheckBox()
         self.path_box = QLineEdit()
+        self.path_box.setReadOnly(True)
         self.settings_button = QPushButton("Settings")
         self.launch_button = QPushButton("Launch")
         self.version_select = QComboBox()
@@ -71,7 +69,7 @@ class MainWindow(QWidget):
 
         self.image_layout = QHBoxLayout()
 
-        self.img_pixmap = QPixmap(random_tablet.random_image())
+        self.img_pixmap = QPixmap(random_image())
 
         self.img_label = QLabel()
         self.img_label.setPixmap(self.img_pixmap)
@@ -132,52 +130,43 @@ class MainWindow(QWidget):
         path_choice.clicked.connect(self.select_directory)
         default_button = QPushButton("Default")
         default_button.clicked.connect(self.default_directory)
-
         path.addWidget(path_label)
         path.addWidget(self.path_box)
         path.addWidget(path_choice)
         path.addWidget(default_button)
 
         ram = QHBoxLayout()
-        ram_slider_label = QLabel(f"RAM: {int(self.ram_box.text())}")
-
+        ram_slider_label = QLabel(f"RAM(mb): ")
         ram.addWidget(ram_slider_label)
-        ram.addWidget(self.ram_slider)
         ram.addWidget(self.ram_box)
 
         jvm = QHBoxLayout()
         jvm_label = QLabel("JVM")
-
         jvm.addWidget(jvm_label)
         jvm.addWidget(self.jvm_box)
 
         licensed = QHBoxLayout()
         license_label = QLabel("License")
-
         licensed.addWidget(license_label)
         licensed.addWidget(self.license_checkbox)
 
         console = QHBoxLayout()
         console_label = QLabel("Console")
-
         console.addWidget(console_label)
         console.addWidget(self.console_checkbox)
 
         snapshot = QHBoxLayout()
         snapshot_label = QLabel("Snapshot")
-
         snapshot.addWidget(snapshot_label)
         snapshot.addWidget(self.snapshot_checkbox)
 
         alpha = QHBoxLayout()
         alpha_label = QLabel("Alpha")
-
         alpha.addWidget(alpha_label)
         alpha.addWidget(self.alpha_checkbox)
 
         data = QHBoxLayout()
         data_label = QLabel("Data")
-
         data.addWidget(data_label)
         data.addWidget(self.data_checkbox)
 
@@ -198,7 +187,6 @@ class MainWindow(QWidget):
         self.settings_interface.setLayout(settings_layout)
 
         self.path_box.textChanged.connect(self.save_settings)
-        self.ram_slider.valueChanged.connect(self.save_settings)
         self.ram_box.textChanged.connect(self.save_settings)
         self.snapshot_checkbox.stateChanged.connect(self.save_settings)
         self.alpha_checkbox.stateChanged.connect(self.save_settings)
@@ -230,7 +218,6 @@ class MainWindow(QWidget):
     def load_settings(self):
         self.username_edit.setText(self.settings.value("username", ""))
         self.version_select.setCurrentText(self.settings.value("version", "latest"))
-        self.ram_slider.setValue(int(self.settings.value("slider_value", 0)))
         self.ram_box.setText(self.settings.value("ram", ""))
         self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", "False") == "True")
         self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
@@ -243,7 +230,6 @@ class MainWindow(QWidget):
     def save_settings(self):
         self.settings.setValue("username", self.username_edit.text())
         self.settings.setValue("version", self.version_select.currentText())
-        self.settings.setValue("slider_value", self.ram_slider.value())
         self.settings.setValue("ram", self.ram_box.text())
         self.settings.setValue("snapshot_checkbox", "True" if self.snapshot_checkbox.isChecked() else "False")
         self.settings.setValue("alpha_checkbox", "True" if self.alpha_checkbox.isChecked() else "False")
@@ -281,6 +267,4 @@ class MainWindow(QWidget):
         settings['data'] = self.data_checkbox.isChecked()
         settings['license'] = self.license_checkbox.isChecked()
 
-        self.launcher.quit()
-        self.launcher.wait()
         self.launcher.start()
