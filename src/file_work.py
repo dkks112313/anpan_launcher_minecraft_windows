@@ -23,8 +23,3 @@ class FileLog:
         with open('version', 'a', encoding='utf-8') as file:
             file.writelines(str(self.path) + '\n')
             file.close()
-
-
-class SaveFile:
-    def __init__(self):
-        pass
