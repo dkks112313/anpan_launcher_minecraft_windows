@@ -36,7 +36,7 @@ class MainWindow(QWidget):
         self.ram_box.setValidator(validator)
 
         self.launcher = Launcher()
-        self.settings = QSettings("MyCompany", "MyApp")
+        self.settings = QSettings("MyCompany", "App")
 
         self.setWindowTitle("Launcher")
 
@@ -101,22 +101,6 @@ class MainWindow(QWidget):
         self.settings_interface.setVisible(False)
 
         self.init_settings_interface()
-
-    def resizeEvent(self, event):
-        self.scale_image()
-        super().resizeEvent(event)
-
-    def scale_image(self):
-        window_width = self.width()
-        window_height = self.height()
-
-        interface_margin = 10
-
-        scaled_width = int(window_width * 0.9) - interface_margin
-        scaled_height = int(window_height * 0.9) - interface_margin
-
-        scaled_pixmap = self.img_pixmap.scaled(scaled_width, scaled_height, Qt.AspectRatioMode.KeepAspectRatio)
-        self.img_label.setPixmap(scaled_pixmap)
 
     def update_version_list(self):
         self.version_select.clear()
