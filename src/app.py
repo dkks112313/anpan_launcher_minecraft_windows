@@ -240,7 +240,7 @@ class MainWindow(QWidget):
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
     def closeEvent(self, event):
-        with open('../version', 'w', encoding='utf-8') as file:
+        with open('version', 'w', encoding='utf-8') as file:
             file.truncate(0)
         request.on_close()
         event.accept()

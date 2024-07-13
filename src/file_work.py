@@ -6,9 +6,9 @@ class FileLog:
         self.path = os.path.join(minecraft_directory)
 
     def read_version(self):
-        file = open('../version', 'a')
+        file = open('version', 'a')
         file.close()
-        file = open('../version', 'r', encoding='utf-8')
+        file = open('version', 'r', encoding='utf-8')
         while True:
             line = file.readline()
             if not line:
@@ -20,7 +20,7 @@ class FileLog:
         return True
 
     def write_version(self):
-        with open('../version', 'a', encoding='utf-8') as file:
+        with open('version', 'a', encoding='utf-8') as file:
             file.writelines(str(self.path) + '\n')
             file.close()
 
