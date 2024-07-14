@@ -1,6 +1,6 @@
 from PyQt6.QtGui import QIntValidator, QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
-    QCheckBox, QFileDialog
+    QCheckBox, QFileDialog, QProgressBar
 from PyQt6.QtCore import QSettings, Qt
 from src.random_tablet import random_image
 import minecraft_launcher_lib
@@ -13,6 +13,7 @@ from src.thread_launch import Launcher
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.progress_bar = None
         self.img_label = None
         self.img_pixmap = None
         self.image_layout = None
@@ -33,7 +34,6 @@ class MainWindow(QWidget):
         validator = QIntValidator()
         self.ram_box.setValidator(validator)
 
-        self.launcher = Launcher()
         self.settings = QSettings("MyCompany", "App")
 
         self.setWindowTitle("Launcher")
@@ -61,6 +61,10 @@ class MainWindow(QWidget):
         self.launch_button.clicked.connect(self.launch_minecraft)
         self.settings_button.clicked.connect(self.show_settings)
 
+        self.launcher = Launcher()
+        self.launcher.state_signal.connect(self.state_progress)
+        self.launcher.progress_signal.connect(self.update_progress)
+
         self.snapshot_checkbox.stateChanged.connect(self.update_version_list)
         self.alpha_checkbox.stateChanged.connect(self.update_version_list)
 
@@ -75,6 +79,23 @@ class MainWindow(QWidget):
         self.img_label.setPixmap(self.img_pixmap)
         self.image_layout.addWidget(self.img_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setProperty("value", 0)
+        self.progress_bar.setVisible(True)
+
+        self.progress_bar.setStyleSheet("""
+                QProgressBar {
+                    border: 2px solid grey;
+                    border-radius: 5px;
+                    text-align: center;
+                }
+                QProgressBar::chunk {
+                    background-color: #ffa500;
+                    width: 1px;
+                    margin: 0.5px;
+                }
+            """)
+
         bottom_layout = QHBoxLayout()
         bottom_layout.addWidget(QLabel("Version:"))
         bottom_layout.addWidget(self.version_select)
@@ -87,6 +108,7 @@ class MainWindow(QWidget):
 
         self.main_interface_layout.addStretch(1)
         self.main_interface_layout.addLayout(self.image_layout)
+        self.main_interface_layout.addWidget(self.progress_bar)
         self.main_interface_layout.addLayout(user_layout)
         self.main_interface_layout.addLayout(bottom_layout)
 
@@ -244,6 +266,15 @@ class MainWindow(QWidget):
             file.truncate(0)
         request.on_close()
         event.accept()
+
+    def state_progress(self, value):
+        self.launch_button.setDisabled(value)
+        self.progress_bar.setVisible(not value)
+
+    def update_progress(self, progress, mprogress):
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(progress)
+        self.progress_bar.setMaximum(mprogress)
 
     def launch_minecraft(self):
         settings['version'] = self.version_select.currentText()
