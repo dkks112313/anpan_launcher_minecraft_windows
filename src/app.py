@@ -36,7 +36,7 @@ class MainWindow(QWidget):
 
         self.settings = QSettings("MyCompany", "App")
 
-        self.setWindowTitle("Launcher")
+        self.setWindowTitle("An-Pan Launcher")
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -240,7 +240,7 @@ class MainWindow(QWidget):
     def load_settings(self):
         self.username_edit.setText(self.settings.value("username", ""))
         self.version_select.setCurrentText(self.settings.value("version", "latest"))
-        self.ram_box.setText(self.settings.value("ram", ""))
+        self.ram_box.setText(self.settings.value("ram", "4000"))
         self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", "False") == "True")
         self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
         self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
