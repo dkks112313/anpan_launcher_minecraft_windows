@@ -1,4 +1,4 @@
-from PyQt6.QtGui import QIntValidator, QPixmap
+from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar
 from PyQt6.QtCore import QSettings, Qt
@@ -37,6 +37,7 @@ class MainWindow(QWidget):
         self.settings = QSettings("MyCompany", "App")
 
         self.setWindowTitle("An-Pan Launcher")
+        self.setWindowIcon(QIcon("icon.ico"))
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
