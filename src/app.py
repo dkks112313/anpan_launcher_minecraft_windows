@@ -18,7 +18,7 @@ class MainWindow(QWidget):
         self.img_pixmap = None
         self.image_layout = None
         self.jvm_box = QLineEdit()
-        self.license_checkbox = QCheckBox()
+        self.git_checkbox = QCheckBox()
         self.console_checkbox = QCheckBox()
         self.main_interface_layout = None
         self.data_checkbox = QCheckBox()
@@ -168,10 +168,10 @@ class MainWindow(QWidget):
         jvm.addWidget(jvm_label)
         jvm.addWidget(self.jvm_box)
 
-        licensed = QHBoxLayout()
-        license_label = QLabel("License")
-        licensed.addWidget(license_label)
-        licensed.addWidget(self.license_checkbox)
+        git = QHBoxLayout()
+        git_lable = QLabel("Auto Update")
+        git.addWidget(git_lable)
+        git.addWidget(self.git_checkbox)
 
         console = QHBoxLayout()
         console_label = QLabel("Console")
@@ -200,7 +200,7 @@ class MainWindow(QWidget):
         settings_layout.addLayout(path)
         settings_layout.addLayout(ram)
         settings_layout.addLayout(jvm)
-        settings_layout.addLayout(licensed)
+        settings_layout.addLayout(git)
         settings_layout.addLayout(console)
         settings_layout.addLayout(snapshot)
         settings_layout.addLayout(alpha)
@@ -215,7 +215,7 @@ class MainWindow(QWidget):
         self.alpha_checkbox.stateChanged.connect(self.save_settings)
         self.data_checkbox.stateChanged.connect(self.save_settings)
         self.console_checkbox.stateChanged.connect(self.save_settings)
-        self.license_checkbox.stateChanged.connect(self.save_settings)
+        self.git_checkbox.stateChanged.connect(self.save_settings)
         self.jvm_box.textChanged.connect(self.save_settings)
 
     def show_settings(self):
@@ -246,7 +246,7 @@ class MainWindow(QWidget):
         self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
         self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
         self.console_checkbox.setChecked(self.settings.value("console_checkbox", "False") == "True")
-        self.license_checkbox.setChecked(self.settings.value("license_checkbox", "False") == "True")
+        self.git_checkbox.setChecked(self.settings.value("update_git", "False") == "True")
         self.data_checkbox.setChecked(self.settings.value("data_checkbox", "False") == "True")
         self.jvm_box.setText(self.settings.value("jvm_box", ""))
 
@@ -258,7 +258,7 @@ class MainWindow(QWidget):
         self.settings.setValue("alpha_checkbox", "True" if self.alpha_checkbox.isChecked() else "False")
         self.settings.setValue("directory", self.path_box.text())
         self.settings.setValue("console_checkbox", "True" if self.console_checkbox.isChecked() else "False")
-        self.settings.setValue("license_checkbox", "True" if self.license_checkbox.isChecked() else "False")
+        self.settings.setValue("update_git", "True" if self.git_checkbox.isChecked() else "False")
         self.settings.setValue("data_checkbox", "True" if self.data_checkbox.isChecked() else "False")
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
@@ -272,10 +272,10 @@ class MainWindow(QWidget):
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
-    def update_progress(self, progress, mprogress):
+    def update_progress(self, progress, max_progress):
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(progress)
-        self.progress_bar.setMaximum(mprogress)
+        self.progress_bar.setMaximum(max_progress)
 
     def launch_minecraft(self):
         settings['version'] = self.version_select.currentText()
@@ -297,6 +297,6 @@ class MainWindow(QWidget):
         settings['alpha'] = self.alpha_checkbox.isChecked()
         settings['snapshot'] = self.snapshot_checkbox.isChecked()
         settings['data'] = self.data_checkbox.isChecked()
-        settings['license'] = self.license_checkbox.isChecked()
+        settings['git'] = self.git_checkbox.isChecked()
 
         self.launcher.start()
