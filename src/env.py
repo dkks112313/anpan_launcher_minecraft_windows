@@ -1,6 +1,8 @@
+import uuid
+
 options = {
     'username': '',
-    'uuid': '',
+    'uuid': str(uuid.uuid4()),
     'token': '',
     'jvmArguments': []
 }
@@ -9,7 +11,7 @@ settings = {
     'alpha': bool(),
     'console': bool(),
     'data': bool(),
-    'license': bool(),
+    'git': bool(),
     'minecraft_directory': '',
     'version': ''
 }
