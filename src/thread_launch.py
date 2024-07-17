@@ -12,6 +12,7 @@ class Launcher(QThread):
     progress = 0
     progress_max = 0
     progress_label = ''
+    status = False
 
     def update_progress_label(self, value):
         self.progress_label = value
@@ -45,6 +46,7 @@ class Launcher(QThread):
         minecraft_directory = settings['minecraft_directory']
         if file.read_version():
             file.write_version()
+            self.status = True
             minecraft_launcher_lib.install.install_minecraft_version(versionid=settings['version'],
                                                                      minecraft_directory=
                                                                      settings['minecraft_directory'],

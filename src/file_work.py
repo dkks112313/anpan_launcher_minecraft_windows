@@ -23,3 +23,21 @@ class FileLog:
         with open('version', 'a', encoding='utf-8') as file:
             file.writelines(str(self.path) + '\n')
             file.close()
+
+
+def check_version_list():
+    file = open('version', 'a')
+    file.close()
+    file = open('version', 'r', encoding='utf-8')
+    list_stings = []
+    while True:
+        line = file.readline()
+        if not line:
+            break
+        if os.path.isdir(line[:len(line) - 1]):
+            list_stings.append(line)
+    file.close()
+
+    file = open('version', 'w', encoding='utf-8')
+    file.writelines(list_stings)
+    file.close()

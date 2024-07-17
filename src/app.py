@@ -1,6 +1,6 @@
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
-    QCheckBox, QFileDialog, QProgressBar
+    QCheckBox, QFileDialog, QProgressBar, QMessageBox
 from PyQt6.QtCore import QSettings, Qt
 from src.random_tablet import random_image
 import minecraft_launcher_lib
@@ -30,6 +30,7 @@ class MainWindow(QWidget):
         self.launch_button = QPushButton("Launch")
         self.version_select = QComboBox()
         self.username_edit = QLineEdit()
+        self.launcher = Launcher()
         self.ram_box = QLineEdit()
         validator = QIntValidator()
         self.ram_box.setValidator(validator)
@@ -62,7 +63,6 @@ class MainWindow(QWidget):
         self.launch_button.clicked.connect(self.launch_minecraft)
         self.settings_button.clicked.connect(self.show_settings)
 
-        self.launcher = Launcher()
         self.launcher.state_signal.connect(self.state_progress)
         self.launcher.progress_signal.connect(self.update_progress)
 
@@ -218,6 +218,15 @@ class MainWindow(QWidget):
         self.git_checkbox.stateChanged.connect(self.save_settings)
         self.jvm_box.textChanged.connect(self.save_settings)
 
+    def show_message(self):
+        self.msgBox = QMessageBox(self)
+        self.msgBox.setIcon(QMessageBox.Icon.Information)
+        self.msgBox.setText("Minecraft is installed and ready to launch")
+        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+        self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
+        self.msgBox.show()
+
     def show_settings(self):
         self.load_settings()
         self.main_interface.setVisible(False)
@@ -239,9 +248,9 @@ class MainWindow(QWidget):
         self.path_box.setText(settings['minecraft_directory'])
 
     def load_settings(self):
-        self.username_edit.setText(self.settings.value("username", ""))
+        self.username_edit.setText(self.settings.value("username", "user"))
         self.version_select.setCurrentText(self.settings.value("version", "latest"))
-        self.ram_box.setText(self.settings.value("ram", "4000"))
+        self.ram_box.setText(self.settings.value("ram", "4096"))
         self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", "False") == "True")
         self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
         self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
@@ -263,12 +272,16 @@ class MainWindow(QWidget):
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
     def closeEvent(self, event):
+        """
         with open('version', 'w', encoding='utf-8') as file:
             file.truncate(0)
+        """
         request.on_close()
         event.accept()
 
     def state_progress(self, value):
+        if self.launcher.status:
+            self.show_message()
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
