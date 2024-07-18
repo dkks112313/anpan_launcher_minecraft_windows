@@ -218,10 +218,10 @@ class MainWindow(QWidget):
         self.git_checkbox.stateChanged.connect(self.save_settings)
         self.jvm_box.textChanged.connect(self.save_settings)
 
-    def show_message(self):
+    def show_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText("Minecraft is installed and ready to launch")
+        self.msgBox.setText(user_message)
         self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
@@ -272,16 +272,12 @@ class MainWindow(QWidget):
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
     def closeEvent(self, event):
-        """
-        with open('version', 'w', encoding='utf-8') as file:
-            file.truncate(0)
-        """
         request.on_close()
         event.accept()
 
     def state_progress(self, value):
         if self.launcher.status:
-            self.show_message()
+            self.show_message("Minecraft is installed and ready to launch")
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
