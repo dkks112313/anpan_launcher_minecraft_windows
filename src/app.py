@@ -8,6 +8,7 @@ import os
 from src.env import *
 from src import request
 from src.thread_launch import Launcher
+import configparser
 
 
 class MainWindow(QWidget):
@@ -247,16 +248,21 @@ class MainWindow(QWidget):
         self.path_box.setText(settings['minecraft_directory'])
 
     def load_settings(self):
-        self.username_edit.setText(self.settings.value("username", "user"))
-        self.version_select.setCurrentText(self.settings.value("version", "latest"))
-        self.ram_box.setText(self.settings.value("ram", "4096"))
-        self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", "False") == "True")
-        self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", "False") == "True")
-        self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
-        self.console_checkbox.setChecked(self.settings.value("console_checkbox", "False") == "True")
-        self.git_checkbox.setChecked(self.settings.value("update_git", "False") == "True")
-        self.data_checkbox.setChecked(self.settings.value("data_checkbox", "False") == "True")
-        self.jvm_box.setText(self.settings.value("jvm_box", ""))
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        self.username_edit.setText(self.settings.value("username", config["CONFIG"]["username"]))
+        self.version_select.setCurrentText(self.settings.value("version", config["CONFIG"]["version"]))
+        self.ram_box.setText(self.settings.value("ram", config["CONFIG"]["ram"]))
+        self.snapshot_checkbox.setChecked(self.settings.value("snapshot_checkbox", config["CONFIG"]["snapshot"]) == "True")
+        self.alpha_checkbox.setChecked(self.settings.value("alpha_checkbox", config["CONFIG"]["alpha"]) == "True")
+        if config['CONFIG']['directory'] == "":
+            self.path_box.setText(self.settings.value("directory", os.path.join(os.getenv('APPDATA'), '.launch')))
+        else:
+            self.path_box.setText(self.settings.value("directory", config['CONFIG']['directory']))
+        self.console_checkbox.setChecked(self.settings.value("console_checkbox", config["CONFIG"]["console"]) == "True")
+        self.git_checkbox.setChecked(self.settings.value("update_git", config["CONFIG"]["git"]) == "True")
+        self.data_checkbox.setChecked(self.settings.value("data_checkbox", config["CONFIG"]["data"]) == "True")
+        self.jvm_box.setText(self.settings.value("jvm_box", config["CONFIG"]["jvm"]))
 
     def save_settings(self):
         self.settings.setValue("username", self.username_edit.text())
@@ -270,7 +276,25 @@ class MainWindow(QWidget):
         self.settings.setValue("data_checkbox", "True" if self.data_checkbox.isChecked() else "False")
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
+    def save_config(self):
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        config["CONFIG"]["username"] = self.username_edit.text()
+        config["CONFIG"]["version"] = self.version_select.currentText()
+        config["CONFIG"]["ram"] = self.ram_box.text()
+        config["CONFIG"]["snapshot"] = str(self.snapshot_checkbox.isChecked())
+        config["CONFIG"]["alpha"] = str(self.alpha_checkbox.isChecked())
+        config["CONFIG"]["directory"] = self.path_box.text()
+        config["CONFIG"]["console"] = str(self.console_checkbox.isChecked())
+        config["CONFIG"]["git"] = str(self.git_checkbox.isChecked())
+        config["CONFIG"]["data"] = str(self.data_checkbox.isChecked())
+        config["CONFIG"]["jvm"] = self.jvm_box.text()
+
+        with open('config.ini', 'w') as configfile:
+            config.write(configfile)
+
     def closeEvent(self, event):
+        self.save_config()
         request.on_close()
         event.accept()
 
