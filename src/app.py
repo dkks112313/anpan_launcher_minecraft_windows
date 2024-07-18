@@ -82,7 +82,6 @@ class MainWindow(QWidget):
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setProperty("value", 0)
-        self.progress_bar.setVisible(True)
 
         self.progress_bar.setStyleSheet("""
                 QProgressBar {
