@@ -1,14 +1,17 @@
+import configparser
+import os
+import subprocess
+
+import minecraft_launcher_lib
+from PyQt6.QtCore import QSettings, Qt
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox
-from PyQt6.QtCore import QSettings, Qt
-from src.random_tablet import random_image
-import minecraft_launcher_lib
-import os
+
+from src import request, regex
 from src.env import *
-from src import request
+from src.random_tablet import random_image
 from src.thread_launch import Launcher
-import configparser
 
 
 class MainWindow(QWidget):
@@ -20,6 +23,7 @@ class MainWindow(QWidget):
         self.image_layout = None
         self.jvm_box = QLineEdit()
         self.git_checkbox = QCheckBox()
+        self.warning_checkbox = QCheckBox()
         self.console_checkbox = QCheckBox()
         self.main_interface_layout = None
         self.data_checkbox = QCheckBox()
@@ -36,9 +40,9 @@ class MainWindow(QWidget):
         validator = QIntValidator()
         self.ram_box.setValidator(validator)
 
-        self.settings = QSettings("MyCompany", "App")
+        self.settings = QSettings("MyApp", "App")
 
-        self.setWindowTitle("An-Pan Launcher")
+        self.setWindowTitle("An-Pa Launcher")
         self.setWindowIcon(QIcon("icon.ico"))
 
         self.main_layout = QVBoxLayout()
@@ -71,6 +75,13 @@ class MainWindow(QWidget):
         self.alpha_checkbox.stateChanged.connect(self.update_version_list)
 
         self.load_settings()
+
+        '''
+        if self.git_checkbox.isChecked():
+            commands = ['python', 'script.py']
+            subprocess.call(commands)
+        '''
+
         self.update_version_list()
 
         self.image_layout = QHBoxLayout()
@@ -123,6 +134,9 @@ class MainWindow(QWidget):
 
         self.init_settings_interface()
 
+        '''if self.git_checkbox.isChecked():
+            self.update_message()'''
+
     def update_version_list(self):
         self.version_select.clear()
         alpha = self.alpha_checkbox.isChecked()
@@ -173,6 +187,11 @@ class MainWindow(QWidget):
         git.addWidget(git_lable)
         git.addWidget(self.git_checkbox)
 
+        warning = QHBoxLayout()
+        warning_label = QLabel("Warning")
+        warning.addWidget(warning_label)
+        warning.addWidget(self.warning_checkbox)
+
         console = QHBoxLayout()
         console_label = QLabel("Console")
         console.addWidget(console_label)
@@ -201,6 +220,7 @@ class MainWindow(QWidget):
         settings_layout.addLayout(ram)
         settings_layout.addLayout(jvm)
         settings_layout.addLayout(git)
+        settings_layout.addLayout(warning)
         settings_layout.addLayout(console)
         settings_layout.addLayout(snapshot)
         settings_layout.addLayout(alpha)
@@ -216,7 +236,21 @@ class MainWindow(QWidget):
         self.data_checkbox.stateChanged.connect(self.save_settings)
         self.console_checkbox.stateChanged.connect(self.save_settings)
         self.git_checkbox.stateChanged.connect(self.save_settings)
+        self.warning_checkbox.stateChanged.connect(self.save_settings)
         self.jvm_box.textChanged.connect(self.save_settings)
+
+    def update_message(self):
+        self.msgBox = QMessageBox(self)
+        self.msgBox.setIcon(QMessageBox.Icon.Information)
+        self.msgBox.setText("You want to update?")
+        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+        res = self.msgBox.exec()
+        if res == QMessageBox.StandardButton.Ok:
+            subprocess.call('update.exe')
+            self.close()
+        self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
+        self.msgBox.show()
 
     def show_message(self, user_message):
         self.msgBox = QMessageBox(self)
@@ -261,6 +295,7 @@ class MainWindow(QWidget):
             self.path_box.setText(self.settings.value("directory", config['CONFIG']['directory']))
         self.console_checkbox.setChecked(self.settings.value("console_checkbox", config["CONFIG"]["console"]) == "True")
         self.git_checkbox.setChecked(self.settings.value("update_git", config["CONFIG"]["git"]) == "True")
+        self.warning_checkbox.setChecked(self.settings.value("warning_checkbox", "False") == "True")
         self.data_checkbox.setChecked(self.settings.value("data_checkbox", config["CONFIG"]["data"]) == "True")
         self.jvm_box.setText(self.settings.value("jvm_box", config["CONFIG"]["jvm"]))
 
@@ -273,6 +308,7 @@ class MainWindow(QWidget):
         self.settings.setValue("directory", self.path_box.text())
         self.settings.setValue("console_checkbox", "True" if self.console_checkbox.isChecked() else "False")
         self.settings.setValue("update_git", "True" if self.git_checkbox.isChecked() else "False")
+        self.settings.setValue("warning_checkbox", "True" if self.warning_checkbox.isChecked() else "False")
         self.settings.setValue("data_checkbox", "True" if self.data_checkbox.isChecked() else "False")
         self.settings.setValue("jvm_box", self.jvm_box.text())
 
@@ -301,6 +337,7 @@ class MainWindow(QWidget):
     def state_progress(self, value):
         if self.launcher.status:
             self.show_message("Minecraft is installed and ready to launch")
+            self.launcher.status = False
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
@@ -312,6 +349,10 @@ class MainWindow(QWidget):
     def launch_minecraft(self):
         settings['version'] = self.version_select.currentText()
         options["username"] = self.username_edit.text()
+
+        if not regex.check_to_latin_alphabet(options["username"]) and self.warning_checkbox.isChecked():
+            self.show_message("Your name contains symbols that may interfere with your future game")
+            self.settings.setValue("warning_checkbox", "False")
 
         if self.path_box.text() != os.path.join(os.getenv('APPDATA'), '.launch'):
             settings['minecraft_directory'] = self.path_box.text()
