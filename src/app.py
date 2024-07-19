@@ -42,7 +42,7 @@ class MainWindow(QWidget):
 
         self.settings = QSettings("MyApp", "App")
 
-        self.setWindowTitle("An-Pa Launcher")
+        self.setWindowTitle("An-Pan Launcher")
         self.setWindowIcon(QIcon("icon.ico"))
 
         self.main_layout = QVBoxLayout()

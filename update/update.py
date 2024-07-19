@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -82,6 +83,7 @@ class Window(QMainWindow):
         self.progress.setValue(value)
         if value == 100:
             self.label.setText("Update complete!")
+            subprocess.call("An-Pan.Launcher.exe")
 
 
 def main():
