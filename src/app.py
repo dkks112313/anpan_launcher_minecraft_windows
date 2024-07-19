@@ -76,12 +76,6 @@ class MainWindow(QWidget):
 
         self.load_settings()
 
-        '''
-        if self.git_checkbox.isChecked():
-            commands = ['python', 'script.py']
-            subprocess.call(commands)
-        '''
-
         self.update_version_list()
 
         self.image_layout = QHBoxLayout()
