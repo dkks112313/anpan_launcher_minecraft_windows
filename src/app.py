@@ -372,4 +372,4 @@ class MainWindow(QWidget):
         settings['data'] = self.data_checkbox.isChecked()
         settings['git'] = self.git_checkbox.isChecked()
 
-        self.launcher.start()
+        self.launcher.start()ff
