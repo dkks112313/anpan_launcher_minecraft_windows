@@ -134,8 +134,8 @@ class MainWindow(QWidget):
 
         self.init_settings_interface()
 
-        '''if self.git_checkbox.isChecked():
-            self.update_messages()'''
+        if self.git_checkbox.isChecked():
+            self.update_message()
 
     def update_version_list(self):
         self.version_select.clear()
