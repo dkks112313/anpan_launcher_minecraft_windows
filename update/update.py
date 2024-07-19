@@ -92,5 +92,5 @@ def main():
     sys.exit(app.exec())
 
 
-if __name__ == "__main__s":
+if __name__ == "__main__":
     main()
