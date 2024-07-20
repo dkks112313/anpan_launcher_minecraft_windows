@@ -22,7 +22,6 @@ class MainWindow(QWidget):
         self.img_pixmap = None
         self.image_layout = None
         self.save_count = None
-        self.update_count = 1
         self.jvm_box = QLineEdit()
         self.git_checkbox = QCheckBox()
         self.warning_checkbox = QCheckBox()
@@ -133,7 +132,7 @@ class MainWindow(QWidget):
         config = configparser.ConfigParser()
         config.read("config.ini")
 
-        if self.git_checkbox.isChecked() and config["CONFIG"]["version_id"] != git_work.get_latest_version() and self.update_count:
+        if self.git_checkbox.isChecked() and config["CONFIG"]["version_id"] != git_work.get_latest_version():
             self.save_count = config["CONFIG"]["version_id"]
             config["CONFIG"]["version_id"] = git_work.get_latest_version()
 
@@ -254,7 +253,6 @@ class MainWindow(QWidget):
 
         res = self.msgBox.exec()
         if res == QMessageBox.StandardButton.Cancel:
-            self.update_count = 0
             config = configparser.ConfigParser()
             config.read('config.ini')
             config["CONFIG"]["version_id"] = self.save_count
@@ -263,8 +261,6 @@ class MainWindow(QWidget):
                 config.write(configfile)
         elif res == QMessageBox.StandardButton.Ok:
             self.run_update()
-
-        self.msgBox.show()
 
     def run_update(self):
         process = QProcess(self)
