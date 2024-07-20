@@ -1,4 +1,6 @@
 import sys
+import time
+
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal, QProcess
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QProgressBar, QWidget
@@ -82,6 +84,7 @@ class Window(QMainWindow):
         self.progress.setValue(value)
         if value == 100:
             self.label.setText("Update complete!")
+            time.sleep(5)
             self.run_main_app()
 
     def run_main_app(self):

@@ -3,6 +3,7 @@ import os
 import sys
 
 import minecraft_launcher_lib
+import requests
 from PyQt6.QtCore import QSettings, Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
@@ -132,14 +133,19 @@ class MainWindow(QWidget):
         config = configparser.ConfigParser()
         config.read("config.ini")
 
-        if self.git_checkbox.isChecked() and config["CONFIG"]["version_id"] != git_work.get_latest_version():
-            self.save_count = config["CONFIG"]["version_id"]
-            config["CONFIG"]["version_id"] = git_work.get_latest_version()
+        try:
+            check = git_work.get_latest_version()
 
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
+            if self.git_checkbox.isChecked() and config["CONFIG"]["version_id"] != check:
+                self.save_count = config["CONFIG"]["version_id"]
+                config["CONFIG"]["version_id"] = check
 
-            self.update_message()
+                with open('config.ini', 'w') as configfile:
+                    config.write(configfile)
+
+                self.update_message()
+        except requests.exceptions.RequestException as err:
+            pass
 
     def update_version_list(self):
         self.version_select.clear()
