@@ -42,7 +42,7 @@ def check_version_list():
 
             if os.path.isdir(line.strip()):
                 list_stings.append(line)
-a
+
     with open('version', 'w', encoding=encoding) as file:
         file.writelines(list_stings)
 

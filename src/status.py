@@ -1,7 +1,7 @@
 import requests
 
 
-def check_internet_connection(j):
+def check_internet_connection():
     url = 'https://www.google.com'
     try:
         response = requests.get(url, timeout=5)

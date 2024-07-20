@@ -393,7 +393,7 @@ class MainWindow(QWidget):
             self.show_message("Your name contains symbols that may interfere with your future game")
             self.settings.setValue("warning_checkbox", "False")
 
-        if status.check_internet_connection():g
+        if status.check_internet_connection():
             if self.path_box.text() != os.path.join(os.getenv('APPDATA'), '.launch'):
                 settings['minecraft_directory'] = self.path_box.text()
             else:
