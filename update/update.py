@@ -1,7 +1,7 @@
 import subprocess
 import sys
 import requests
-from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal, QProcess
 from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QVBoxLayout, QProgressBar, QWidget
 
 
@@ -31,6 +31,9 @@ class DownloadThread(QThread):
 
 
 class Window(QMainWindow):
+    REPO = "dkks112313/An-Pan-Launcher"
+    ASSET_NAME = "An-Pan-Launcher.exe"
+
     def __init__(self):
         super().__init__()
         self.download_thread = None
@@ -63,19 +66,16 @@ class Window(QMainWindow):
         self.start_download()
 
     def start_download(self):
-        REPO = "dkks112313/An-Pan-Launcher"
-        ASSET_NAME = "An-Pan.Launcher.exe"
-
-        response = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest")
+        response = requests.get(f"https://api.github.com/repos/{self.REPO}/releases/latest")
         release_data = response.json()
 
         asset_url = None
         for asset in release_data.get("assets", []):
-            if asset["name"] == ASSET_NAME:
+            if asset["name"] == self.ASSET_NAME:
                 asset_url = asset["browser_download_url"]
                 break
 
-        self.download_thread = DownloadThread(asset_url, ASSET_NAME)
+        self.download_thread = DownloadThread(asset_url, self.ASSET_NAME)
         self.download_thread.progress_changed.connect(self.update_progress)
         self.download_thread.start()
 
@@ -83,7 +83,11 @@ class Window(QMainWindow):
         self.progress.setValue(value)
         if value == 100:
             self.label.setText("Update complete!")
-            subprocess.call("An-Pan.Launcher.exe")
+            self.run_main_app()
+
+    def run_main_app(self):
+        process = QProcess(self)
+        process.startDetached(self.ASSET_NAME)
 
 
 def main():

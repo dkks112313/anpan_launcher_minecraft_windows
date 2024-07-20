@@ -1,14 +1,14 @@
 import configparser
 import os
-import subprocess
+import sys
 
 import minecraft_launcher_lib
-from PyQt6.QtCore import QSettings, Qt
+from PyQt6.QtCore import QSettings, Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox
 
-from src import request, regex
+from src import request, regex, git_work
 from src.env import *
 from src.random_tablet import random_image
 from src.thread_launch import Launcher
@@ -21,6 +21,8 @@ class MainWindow(QWidget):
         self.img_label = None
         self.img_pixmap = None
         self.image_layout = None
+        self.save_count = None
+        self.update_count = 1
         self.jvm_box = QLineEdit()
         self.git_checkbox = QCheckBox()
         self.warning_checkbox = QCheckBox()
@@ -128,7 +130,16 @@ class MainWindow(QWidget):
 
         self.init_settings_interface()
 
-        if self.git_checkbox.isChecked():
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+
+        if self.git_checkbox.isChecked() and config["CONFIG"]["version_id"] != git_work.get_latest_version() and self.update_count:
+            self.save_count = config["CONFIG"]["version_id"]
+            config["CONFIG"]["version_id"] = git_work.get_latest_version()
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+
             self.update_message()
 
     def update_version_list(self):
@@ -238,13 +249,27 @@ class MainWindow(QWidget):
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText("You want to update?")
         self.msgBox.setWindowTitle("Message")
-        self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
-        res = self.msgBox.exec()
-        if res == QMessageBox.StandardButton.Ok:
-            subprocess.call('update.exe')
-            self.close()
+        self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        res = self.msgBox.exec()
+        if res == QMessageBox.StandardButton.Cancel:
+            self.update_count = 0
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+            config["CONFIG"]["version_id"] = self.save_count
+
+            with open('config.ini', 'w') as configfile:
+                config.write(configfile)
+        elif res == QMessageBox.StandardButton.Ok:
+            self.run_update()
+
         self.msgBox.show()
+
+    def run_update(self):
+        process = QProcess(self)
+        process.startDetached("update.exe")
+        sys.exit()
 
     def show_message(self, user_message):
         self.msgBox = QMessageBox(self)
