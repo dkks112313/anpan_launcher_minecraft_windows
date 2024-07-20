@@ -1,4 +1,3 @@
-import subprocess
 import sys
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal, QProcess
