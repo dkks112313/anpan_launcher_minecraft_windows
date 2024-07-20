@@ -9,7 +9,7 @@ from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox
 
-from src import request, regex, git_work
+from src import request, regex, git_work, file_work, status
 from src.env import *
 from src.random_tablet import random_image
 from src.thread_launch import Launcher
@@ -152,21 +152,27 @@ class MainWindow(QWidget):
         alpha = self.alpha_checkbox.isChecked()
         snapshot = self.snapshot_checkbox.isChecked()
 
-        if alpha and snapshot:
-            for version_info in minecraft_launcher_lib.utils.get_version_list():
-                self.version_select.addItem(version_info["id"])
-        elif alpha:
-            for version_info in minecraft_launcher_lib.utils.get_version_list():
-                if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
-                    self.version_select.addItem(version_info['id'])
-        elif snapshot:
-            for version_info in minecraft_launcher_lib.utils.get_version_list():
-                if version_info['type'] in ['snapshot', 'release']:
-                    self.version_select.addItem(version_info['id'])
-        else:
-            for version_info in minecraft_launcher_lib.utils.get_version_list():
-                if version_info['type'] in ['release']:
+        file_work.check_version_list()
+
+        if status.check_internet_connection():
+            if alpha and snapshot:
+                for version_info in minecraft_launcher_lib.utils.get_version_list():
                     self.version_select.addItem(version_info["id"])
+            elif alpha:
+                for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
+                        self.version_select.addItem(version_info['id'])
+            elif snapshot:
+                for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    if version_info['type'] in ['snapshot', 'release']:
+                        self.version_select.addItem(version_info['id'])
+            else:
+                for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    if version_info['type'] in ['release']:
+                        self.version_select.addItem(version_info["id"])
+        else:
+            for version_item in file_work.get_version_list():
+                self.version_select.addItem(version_item)
 
     def init_settings_interface(self):
         settings_layout = QVBoxLayout()
@@ -369,16 +375,31 @@ class MainWindow(QWidget):
 
     def launch_minecraft(self):
         settings['version'] = self.version_select.currentText()
+
+        '''count = 0
+        flag = False
+        for i in settings['version']:
+            if i == '|':
+                flag = True
+                break
+            count += 1
+
+        if flag:
+            settings['version'] = settings['version'][:count-1]'''
+
         options["username"] = self.username_edit.text()
 
         if not regex.check_to_latin_alphabet(options["username"]) and self.warning_checkbox.isChecked():
             self.show_message("Your name contains symbols that may interfere with your future game")
             self.settings.setValue("warning_checkbox", "False")
 
-        if self.path_box.text() != os.path.join(os.getenv('APPDATA'), '.launch'):
-            settings['minecraft_directory'] = self.path_box.text()
+        if status.check_internet_connection():
+            if self.path_box.text() != os.path.join(os.getenv('APPDATA'), '.launch'):
+                settings['minecraft_directory'] = self.path_box.text()
+            else:
+                settings['minecraft_directory'] = os.path.join(os.getenv('APPDATA'), '.launch')
         else:
-            settings['minecraft_directory'] = os.path.join(os.getenv('APPDATA'), '.launch')
+            settings['minecraft_directory'] = file_work.directory_path_version()[settings['version']]
 
         if self.jvm_box.text():
             for arg in self.jvm_box.text().split(" "):
