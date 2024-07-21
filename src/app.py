@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, 
 
 from src import request, regex, git_work, file_work, status
 from src.env import *
-from src.random_tablet import random_image
+from src.random_image import random_image, random_image2
 from src.thread_launch import Launcher
 
 
@@ -67,6 +67,9 @@ class MainWindow(QWidget):
         self.launch_button = QPushButton("Launch")
         self.settings_button = QPushButton("Settings")
 
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setProperty("value", 0)
+
         self.launch_button.clicked.connect(self.launch_minecraft)
         self.settings_button.clicked.connect(self.show_settings)
 
@@ -82,14 +85,11 @@ class MainWindow(QWidget):
 
         self.image_layout = QHBoxLayout()
 
-        self.img_pixmap = QPixmap(random_image())
+        self.img_pixmap = QPixmap(random_image2())
 
         self.img_label = QLabel()
         self.img_label.setPixmap(self.img_pixmap)
         self.image_layout.addWidget(self.img_label, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setProperty("value", 0)
 
         self.progress_bar.setStyleSheet("""
                 QProgressBar {
@@ -171,6 +171,7 @@ class MainWindow(QWidget):
                     if version_info['type'] in ['release']:
                         self.version_select.addItem(version_info["id"])
         else:
+            self.progress_bar.setVisible(False)
             for version_item in file_work.get_version_list():
                 self.version_select.addItem(version_item)
 
@@ -413,5 +414,11 @@ class MainWindow(QWidget):
         settings['snapshot'] = self.snapshot_checkbox.isChecked()
         settings['data'] = self.data_checkbox.isChecked()
         settings['git'] = self.git_checkbox.isChecked()
+
+        if status.check_internet_connection():
+            if os.path.isdir(settings['minecraft_directory']+'\\'+settings['version']):
+                self.show_message("Minecraft is starting")
+        else:
+            self.show_message("Minecraft is starting")
 
         self.launcher.start()

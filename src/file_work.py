@@ -27,6 +27,9 @@ class FileLog:
 
 
 def check_version_list():
+    file = open('version', 'a')
+    file.close()
+
     with open('version', 'rb') as file:
         raw_data = file.read()
         result = chardet.detect(raw_data)
@@ -36,7 +39,6 @@ def check_version_list():
         list_stings = []
         while True:
             line = file.readline()
-            print(line)
             if not line:
                 break
 
