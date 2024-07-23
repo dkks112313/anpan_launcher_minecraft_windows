@@ -10,6 +10,8 @@ def random_image():
 def random_image2():
     path = Path('content')
     file = [x for x in path.iterdir() if x.is_file()]
+    if len(file) == 0:
+        return ""
     index = random.randint(0, len(file) - 1)
 
     image_list = []

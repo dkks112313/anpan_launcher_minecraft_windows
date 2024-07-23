@@ -1,14 +1,14 @@
 import sys
-from src import app
+from src import apps
 from PyQt6.QtWidgets import QApplication
 
 
 def main():
-    apps = QApplication(sys.argv)
-    window = app.MainWindow()
+    app = QApplication(sys.argv)
+    window = apps.MainWindow()
     window.setFixedSize(700, 700)
     window.show()
-    sys.exit(apps.exec())
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":

@@ -144,7 +144,7 @@ class MainWindow(QWidget):
                     config.write(configfile)
 
                 self.update_message()
-        except requests.exceptions.RequestException as err:
+        except requests.exceptions.RequestException:
             pass
 
     def update_version_list(self):

@@ -11,7 +11,6 @@ def get_latest_version():
     return release_data.get("name")
 
 
-
 '''
 def get_latest_exe():
     response = requests.get(f"https://api.github.com/repos/{REPO}/releases/latest")

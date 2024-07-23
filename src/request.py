@@ -8,13 +8,13 @@ def get_json():
     uname_info = platform.uname()
 
     return {
-        'Система': f'{uname_info.system}',
-        'Имя узла': f'{uname_info.node}',
-        'Релиз': f'{uname_info.release}',
-        'Версия': f'{uname_info.version}',
-        'Машина': f'{uname_info.machine}',
-        'Процессор': f'{uname_info.processor}',
-        'count': 1
+        'System': f'{uname_info.system}',
+        'Name node': f'{uname_info.node}',
+        'Release': f'{uname_info.release}',
+        'Version': f'{uname_info.version}',
+        'Machine': f'{uname_info.machine}',
+        'Processor': f'{uname_info.processor}',
+        'Count': 1
     }
 
 
