@@ -83,9 +83,9 @@ class Window(QMainWindow):
     def update_progress(self, value):
         self.progress.setValue(value)
         if value == 100:
-            self.label.setText("Update complete!")
             time.sleep(5)
             self.run_main_app()
+            self.close()
 
     def run_main_app(self):
         process = QProcess(self)

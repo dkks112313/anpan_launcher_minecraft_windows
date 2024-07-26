@@ -18,6 +18,7 @@ from src.thread_launch import Launcher
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        configer.checker_config_params_to_exist()
         self.progress_bar = None
         self.img_label = None
         self.img_pixmap = None
@@ -301,8 +302,22 @@ class MainWindow(QWidget):
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
+    def show_launch_message(self, user_message):
+        self.msgBox = QMessageBox(self)
+        self.msgBox.setIcon(QMessageBox.Icon.Information)
+        self.msgBox.setText(user_message)
+        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
+        self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
+        self.msgBox.buttonClicked.connect(self.on_message_box_close)
+        self.msgBox.exec()
+
+    def on_message_box_close(self):
+        self.launcher.release_wait()
+
     def show_settings(self):
         self.load_settings()
+        self.save_settings()
         self.main_interface.setVisible(False)
         self.settings_interface.setVisible(True)
 
@@ -350,7 +365,6 @@ class MainWindow(QWidget):
 
         config = configparser.ConfigParser()
         config.read('config.ini')
-
         configer.checker_config_params_to_exist()
 
         config["CONFIG"]["username"] = self.username_edit.text()
@@ -392,7 +406,7 @@ class MainWindow(QWidget):
 
     def state_progress(self, value):
         if self.launcher.status:
-            self.show_message("Minecraft is installed and ready to launch")
+            self.show_launch_message("Minecraft is installed and starts")
             self.launcher.status = False
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
@@ -403,19 +417,9 @@ class MainWindow(QWidget):
         self.progress_bar.setMaximum(max_progress)
 
     def launch_minecraft(self):
+        configer.create_or_no_new_config()
+        configer.checker_config_params_to_exist()
         settings['version'] = self.version_select.currentText()
-
-        '''count = 0
-        flag = False
-        for i in settings['version']:
-            if i == '|':
-                flag = True
-                break
-            count += 1
-
-        if flag:
-            settings['version'] = settings['version'][:count-1]'''
-
         options["username"] = self.username_edit.text()
 
         if not regex.check_to_latin_alphabet(options["username"]) and self.warning_checkbox.isChecked():
@@ -444,9 +448,11 @@ class MainWindow(QWidget):
         settings['git'] = self.git_checkbox.isChecked()
 
         if status.check_internet_connection():
-            if os.path.isdir(settings['minecraft_directory']+'\\'+settings['version']):
-                self.show_message("Minecraft is starting")
+            if file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
+                if os.path.isdir(settings['minecraft_directory']+'\\'+settings['version']):
+                    self.show_message("Minecraft is starting")
         else:
-            self.show_message("Minecraft is starting")
+            if file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
+                self.show_message("Minecraft is starting")
 
         self.launcher.start()

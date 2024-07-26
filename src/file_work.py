@@ -26,6 +26,21 @@ class FileLog:
             file.close()
 
 
+def read_version_and_check(path):
+    file = open('version', 'a', encoding='utf-8')
+    file.close()
+    file = open('version', 'r', encoding='utf-8')
+    while True:
+        line = file.readline()
+        if not line:
+            break
+        if path + '\n' == line:
+            file.close()
+            return True
+    file.close()
+    return False
+
+
 def check_version_list():
     file = open('version', 'a')
     file.close()

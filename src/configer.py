@@ -35,40 +35,29 @@ def create_or_no_new_config():
 
 def checker_config_params_to_exist():
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read('config.ini')
 
-    if not config.has_option('CONFIG', 'username'):
-        config['CONFIG']['username'] = "user"
+    if 'CONFIG' not in config:
+        config['CONFIG'] = {}
 
-    if not config.has_option('CONFIG', 'version'):
-        config['CONFIG']['version'] = "1.21"
+    default_values = {
+        "username": "user",
+        "version": "latest",
+        "ram": "4096",
+        "snapshot": "False",
+        "alpha": "False",
+        "directory": os.path.join(os.getenv('APPDATA'), '.launch'),
+        "console": "False",
+        "git": "True",
+        "warning": "True",
+        "data": "False",
+        "jvm": "",
+        "version_id": ""
+    }
 
-    if not config.has_option('CONFIG', 'ram'):
-        config['CONFIG']['ram'] = "4096"
+    for key, value in default_values.items():
+        if key not in config['CONFIG']:
+            config['CONFIG'][key] = value
 
-    if not config.has_option('CONFIG', 'snapshot'):
-        config['CONFIG']['snapshot'] = "False"
-
-    if not config.has_option('CONFIG', 'alpha'):
-        config['CONFIG']['alpha'] = "False"
-
-    if not config.has_option('CONFIG', 'directory'):
-        config['CONFIG']['directory'] = ""
-
-    if not config.has_option('CONFIG', 'console'):
-        config['CONFIG']['console'] = "False"
-
-    if not config.has_option('CONFIG', 'git'):
-        config['CONFIG']['git'] = "True"
-
-    if not config.has_option('CONFIG', 'data'):
-        config['CONFIG']['data'] = "False"
-
-    if not config.has_option('CONFIG', 'warning'):
-        config['CONFIG']['warning'] = "False"
-
-    if not config.has_option('CONFIG', 'jvm'):
-        config['CONFIG']['jvm'] = ""
-
-    if not config.has_option('CONFIG', 'version_id'):
-        config['CONFIG']['version_id'] = ""
+    with open('config.ini', 'w') as configfile:
+        config.write(configfile)
