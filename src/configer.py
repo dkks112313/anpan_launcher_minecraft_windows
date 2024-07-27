@@ -27,6 +27,8 @@ def create_or_no_new_config():
         config['CONFIG']['data'] = "False"
         config['CONFIG']['warning'] = "False"
         config['CONFIG']['jvm'] = ""
+        config['CONFIG']['exit'] = "False"
+        config['CONFIG']['lang'] = "English"
         config['CONFIG']['version_id'] = ""
 
         with open('config.ini', 'w') as configfile:
@@ -52,6 +54,8 @@ def checker_config_params_to_exist():
         "warning": "True",
         "data": "False",
         "jvm": "",
+        "exit": "False",
+        "lang": "English",
         "version_id": ""
     }
 

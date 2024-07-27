@@ -13,5 +13,6 @@ settings = {
     'data': bool(),
     'git': bool(),
     'minecraft_directory': '',
-    'version': ''
+    'version': '',
+    'status': bool()
 }
