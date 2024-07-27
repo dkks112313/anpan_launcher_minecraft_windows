@@ -22,6 +22,7 @@ def create_or_no_new_config():
         config['CONFIG']['snapshot'] = "False"
         config['CONFIG']['alpha'] = "False"
         config['CONFIG']['directory'] = ""
+        config['CONFIG']['java'] = ""
         config['CONFIG']['console'] = "False"
         config['CONFIG']['git'] = "True"
         config['CONFIG']['data'] = "False"
@@ -49,6 +50,7 @@ def checker_config_params_to_exist():
         "snapshot": "False",
         "alpha": "False",
         "directory": os.path.join(os.getenv('APPDATA'), '.launch'),
+        "java": "",
         "console": "False",
         "git": "True",
         "warning": "True",

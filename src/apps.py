@@ -8,7 +8,6 @@ from PyQt6.QtCore import Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox
-from googletrans import Translator
 
 from src import request, regex, git_work, file_work, status, configer
 from src.env import *
@@ -22,25 +21,27 @@ class MainWindow(QWidget):
         configer.checker_config_params_to_exist()
         config = configparser.ConfigParser()
         config.read('config.ini')
-
         self.language_select = QComboBox()
         self.language_select.addItems(["English", "Ukraine"])
-
+        self.settings_button = None
+        self.launch_button = None
         self.progress_bar = None
         self.img_label = None
         self.img_pixmap = None
         self.image_layout = None
         self.save_count = None
+        self.main_interface_layout = None
         self.jvm_box = QLineEdit()
         self.git_checkbox = QCheckBox()
         self.warning_checkbox = QCheckBox()
         self.console_checkbox = QCheckBox()
-        self.main_interface_layout = None
         self.data_checkbox = QCheckBox()
         self.alpha_checkbox = QCheckBox()
         self.snapshot_checkbox = QCheckBox()
         self.path_box = QLineEdit()
         self.path_box.setReadOnly(True)
+        self.java_box = QLineEdit()
+        self.java_box.setReadOnly(True)
         self.version_select = QComboBox()
         self.username_edit = QLineEdit()
         self.exit_checkbox = QCheckBox()
@@ -107,16 +108,8 @@ class MainWindow(QWidget):
             os.mkdir('content')
 
         self.progress_bar.setStyleSheet("""
-                QProgressBar {
-                    border: 2px solid grey;
-                    border-radius: 5px;
-                    text-align: center;
-                }
-                QProgressBar::chunk {
-                    background-color: #ffa500;
-                    width: 1px;
-                    margin: 0.5px;
-                }
+            QProgressBar {border: 2px solid grey;border-radius: 5px;text-align: center;}
+            QProgressBar::chunk {background-color: #ffa500;width: 1px;margin: 0.5px;}
             """)
 
         bottom_layout = QHBoxLayout()
@@ -206,6 +199,17 @@ class MainWindow(QWidget):
         path.addWidget(default_button)
         path.addWidget(open_version_path)
 
+        java = QHBoxLayout()
+        java_label = QLabel(self.translate_language("Java"))
+        java_choice = QPushButton(self.translate_language("Choice"))
+        java_choice.clicked.connect(self.select_java)
+        java_default = QPushButton(self.translate_language("Default"))
+        java_default.clicked.connect(self.default_java)
+        java.addWidget(java_label)
+        java.addWidget(self.java_box)
+        java.addWidget(java_choice)
+        java.addWidget(java_default)
+
         ram = QHBoxLayout()
         ram_slider_label = QLabel(f"RAM(mb): ")
         ram.addWidget(ram_slider_label)
@@ -261,6 +265,7 @@ class MainWindow(QWidget):
 
         settings_layout.addStretch(1)
         settings_layout.addLayout(path)
+        settings_layout.addLayout(java)
         settings_layout.addLayout(ram)
         settings_layout.addLayout(jvm)
         settings_layout.addLayout(git)
@@ -274,18 +279,6 @@ class MainWindow(QWidget):
         settings_layout.addWidget(back_button)
 
         self.settings_interface.setLayout(settings_layout)
-
-        self.path_box.textChanged.connect(self.save_settings)
-        self.ram_box.textChanged.connect(self.save_settings)
-        self.snapshot_checkbox.stateChanged.connect(self.save_settings)
-        self.alpha_checkbox.stateChanged.connect(self.save_settings)
-        self.data_checkbox.stateChanged.connect(self.save_settings)
-        self.console_checkbox.stateChanged.connect(self.save_settings)
-        self.git_checkbox.stateChanged.connect(self.save_settings)
-        self.warning_checkbox.stateChanged.connect(self.save_settings)
-        self.jvm_box.textChanged.connect(self.save_settings)
-        self.exit_checkbox.stateChanged.connect(self.save_settings)
-        self.language_select.currentTextChanged.connect(self.save_settings)
 
     def run_update(self):
         process = QProcess(self)
@@ -366,26 +359,22 @@ class MainWindow(QWidget):
         settings['minecraft_directory'] = os.path.join(os.getenv('APPDATA'), '.launch')
         self.path_box.setText(settings['minecraft_directory'])
 
+    def select_java(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select Directory")
+        if directory:
+            self.java_box.setText(directory)
+
+    def default_java(self):
+        self.java_box.setText("")
+
     def open_directory(self):
-        if os.path.isdir(self.path_box.text()+'\\'+self.version_select.currentText()):
-            os.system("explorer "+self.path_box.text()+'\\'+self.version_select.currentText())
+        if os.path.isdir(self.path_box.text() + '\\' + self.version_select.currentText()):
+            os.system("explorer " + self.path_box.text() + '\\' + self.version_select.currentText())
         else:
             self.show_message("Directory not exist")
 
-    def translate_language(self, word):
-        '''if settings['status']:
-            translator = Translator()
-            res = ''
-            config = configparser.ConfigParser()
-            config.read('config.ini')
-
-            if config["CONFIG"]["lang"] == 'English':
-                res = translator.translate(word, dest='en')
-            elif config["CONFIG"]["lang"] == 'Ukraine':
-                res = translator.translate(word, dest='uk')
-
-            return res.text
-        else:'''
+    @staticmethod
+    def translate_language(word):
         return word
 
     def translate_all_text(self):
@@ -393,10 +382,8 @@ class MainWindow(QWidget):
 
     def load_settings(self):
         configer.create_or_no_new_config()
-
         config = configparser.ConfigParser()
         config.read('config.ini')
-
         configer.checker_config_params_to_exist()
 
         self.username_edit.setText(config["CONFIG"]["username"])
@@ -408,6 +395,7 @@ class MainWindow(QWidget):
             self.path_box.setText(os.path.join(os.getenv('APPDATA'), '.launch'))
         else:
             self.path_box.setText(config['CONFIG']['directory'])
+        self.java_box.setText(config['CONFIG']['java'])
         self.console_checkbox.setChecked(config["CONFIG"]["console"] == "True")
         self.git_checkbox.setChecked(config["CONFIG"]["git"] == "True")
         self.warning_checkbox.setChecked(config["CONFIG"]["warning"] == "True")
@@ -429,6 +417,7 @@ class MainWindow(QWidget):
         config["CONFIG"]["snapshot"] = "True" if self.snapshot_checkbox.isChecked() else "False"
         config["CONFIG"]["alpha"] = "True" if self.alpha_checkbox.isChecked() else "False"
         config['CONFIG']['directory'] = self.path_box.text()
+        config['CONFIG']['java'] = self.java_box.text()
         config["CONFIG"]["console"] = "True" if self.console_checkbox.isChecked() else "False"
         config["CONFIG"]["git"] = "True" if self.git_checkbox.isChecked() else "False"
         config["CONFIG"]["data"] = "True" if self.data_checkbox.isChecked() else "False"
@@ -449,6 +438,7 @@ class MainWindow(QWidget):
         config["CONFIG"]["snapshot"] = str(self.snapshot_checkbox.isChecked())
         config["CONFIG"]["alpha"] = str(self.alpha_checkbox.isChecked())
         config["CONFIG"]["directory"] = self.path_box.text()
+        config['CONFIG']['java'] = self.java_box.text()
         config["CONFIG"]["console"] = str(self.console_checkbox.isChecked())
         config["CONFIG"]["git"] = str(self.git_checkbox.isChecked())
         config["CONFIG"]["data"] = str(self.data_checkbox.isChecked())
@@ -470,6 +460,7 @@ class MainWindow(QWidget):
             self.launcher.status = False
             if self.exit_checkbox.isChecked():
                 self.close()
+
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
@@ -504,6 +495,9 @@ class MainWindow(QWidget):
         ram = int(self.ram_box.text())
         options['jvmArguments'].append(f'-Xmx{ram}M')
 
+        if self.java_box.text() != "":
+            options['executablePath'] = os.path.join(self.java_box.text(), 'javaw.exe')
+
         settings['console'] = self.console_checkbox.isChecked()
         settings['alpha'] = self.alpha_checkbox.isChecked()
         settings['snapshot'] = self.snapshot_checkbox.isChecked()
@@ -511,14 +505,15 @@ class MainWindow(QWidget):
         settings['git'] = self.git_checkbox.isChecked()
 
         if status.check_internet_connection():
-            if file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
-                if os.path.isdir(settings['minecraft_directory']+'\\'+settings['version']):
+            if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
+                if os.path.isdir(settings['minecraft_directory'] + '\\' + settings['version']):
                     self.show_message("Minecraft is starting")
         else:
-            if file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
+            if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
                 self.show_message("Minecraft is starting")
 
         self.launcher.start()
 
-        if self.exit_checkbox.isChecked() and file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
+        if self.exit_checkbox.isChecked() and file_work.read_version_and_check(
+                settings['minecraft_directory'] + '\\' + settings['version']):
             self.close()

@@ -3,7 +3,7 @@ import subprocess
 import minecraft_launcher_lib
 from PyQt6.QtCore import QThread, QWaitCondition, QMutex, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
-from src import file_work
+from src import file_work, folder
 from src.env import *
 
 
@@ -68,6 +68,8 @@ class Launcher(QThread):
             self.wait_condition.wait(self.mutex)
             self.mutex.unlock()
 
+            folder.removing_folder_resources()
+
         if settings['version'] == '1.16.5':
             options['jvmArguments'].append('-Dminecraft.api.env=custom')
             options['jvmArguments'].append('-Dminecraft.api.auth.host=https://invalid.invalid/')
@@ -86,5 +88,4 @@ class Launcher(QThread):
             subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
 
         options['jvmArguments'] = []
-
-        #self.state_signal.emit(False)
+        self.state_signal.emit(False)
