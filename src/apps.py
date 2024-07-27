@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox
+from googletrans import Translator
 
 from src import request, regex, git_work, file_work, status, configer
 from src.env import *
@@ -19,6 +20,12 @@ class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
         configer.checker_config_params_to_exist()
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+
+        self.language_select = QComboBox()
+        self.language_select.addItems(["English", "Ukraine"])
+
         self.progress_bar = None
         self.img_label = None
         self.img_pixmap = None
@@ -34,10 +41,9 @@ class MainWindow(QWidget):
         self.snapshot_checkbox = QCheckBox()
         self.path_box = QLineEdit()
         self.path_box.setReadOnly(True)
-        self.settings_button = QPushButton("Settings")
-        self.launch_button = QPushButton("Launch")
         self.version_select = QComboBox()
         self.username_edit = QLineEdit()
+        self.exit_checkbox = QCheckBox()
         self.launcher = Launcher()
         self.ram_box = QLineEdit()
         validator = QIntValidator()
@@ -63,8 +69,14 @@ class MainWindow(QWidget):
 
         self.username_edit = QLineEdit()
         self.version_select = QComboBox()
-        self.launch_button = QPushButton("Launch")
-        self.settings_button = QPushButton("Settings")
+
+        if status.check_internet_connection():
+            settings['status'] = True
+        else:
+            settings['status'] = False
+
+        self.launch_button = QPushButton(self.translate_language("Launch"))
+        self.settings_button = QPushButton(self.translate_language("Settings"))
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setProperty("value", 0)
@@ -108,13 +120,13 @@ class MainWindow(QWidget):
             """)
 
         bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(QLabel("Version:"))
+        bottom_layout.addWidget(QLabel(self.translate_language("Version:")))
         bottom_layout.addWidget(self.version_select)
         bottom_layout.addWidget(self.launch_button)
         bottom_layout.addWidget(self.settings_button)
 
         user_layout = QHBoxLayout()
-        user_layout.addWidget(QLabel("Username:"))
+        user_layout.addWidget(QLabel(self.translate_language("Username:")))
         user_layout.addWidget(self.username_edit)
 
         self.main_interface_layout.addStretch(1)
@@ -181,15 +193,18 @@ class MainWindow(QWidget):
         settings_layout = QVBoxLayout()
 
         path = QHBoxLayout()
-        path_label = QLabel("Path")
-        path_choice = QPushButton("Choice")
+        path_label = QLabel(self.translate_language("Path"))
+        path_choice = QPushButton(self.translate_language("Choice"))
         path_choice.clicked.connect(self.select_directory)
-        default_button = QPushButton("Default")
+        default_button = QPushButton(self.translate_language("Default"))
         default_button.clicked.connect(self.default_directory)
+        open_version_path = QPushButton(self.translate_language("Open"))
+        open_version_path.clicked.connect(self.open_directory)
         path.addWidget(path_label)
         path.addWidget(self.path_box)
         path.addWidget(path_choice)
         path.addWidget(default_button)
+        path.addWidget(open_version_path)
 
         ram = QHBoxLayout()
         ram_slider_label = QLabel(f"RAM(mb): ")
@@ -202,17 +217,17 @@ class MainWindow(QWidget):
         jvm.addWidget(self.jvm_box)
 
         git = QHBoxLayout()
-        git_lable = QLabel("Auto Update")
+        git_lable = QLabel(self.translate_language("Auto Update"))
         git.addWidget(git_lable)
         git.addWidget(self.git_checkbox)
 
         warning = QHBoxLayout()
-        warning_label = QLabel("Warning")
+        warning_label = QLabel(self.translate_language("Warning"))
         warning.addWidget(warning_label)
         warning.addWidget(self.warning_checkbox)
 
         console = QHBoxLayout()
-        console_label = QLabel("Console")
+        console_label = QLabel(self.translate_language("Console"))
         console.addWidget(console_label)
         console.addWidget(self.console_checkbox)
 
@@ -227,11 +242,21 @@ class MainWindow(QWidget):
         alpha.addWidget(self.alpha_checkbox)
 
         data = QHBoxLayout()
-        data_label = QLabel("Data")
+        data_label = QLabel(self.translate_language("Data"))
         data.addWidget(data_label)
         data.addWidget(self.data_checkbox)
 
-        back_button = QPushButton("Back")
+        exit_launcher = QHBoxLayout()
+        exit_label = QLabel(self.translate_language("Exit"))
+        exit_launcher.addWidget(exit_label)
+        exit_launcher.addWidget(self.exit_checkbox)
+
+        language = QHBoxLayout()
+        language_label = QLabel(self.translate_language("Language"))
+        language.addWidget(language_label)
+        language.addWidget(self.language_select)
+
+        back_button = QPushButton(self.translate_language("Back"))
         back_button.clicked.connect(self.show_main)
 
         settings_layout.addStretch(1)
@@ -244,6 +269,8 @@ class MainWindow(QWidget):
         settings_layout.addLayout(snapshot)
         settings_layout.addLayout(alpha)
         settings_layout.addLayout(data)
+        settings_layout.addLayout(exit_launcher)
+        settings_layout.addLayout(language)
         settings_layout.addWidget(back_button)
 
         self.settings_interface.setLayout(settings_layout)
@@ -257,6 +284,8 @@ class MainWindow(QWidget):
         self.git_checkbox.stateChanged.connect(self.save_settings)
         self.warning_checkbox.stateChanged.connect(self.save_settings)
         self.jvm_box.textChanged.connect(self.save_settings)
+        self.exit_checkbox.stateChanged.connect(self.save_settings)
+        self.language_select.currentTextChanged.connect(self.save_settings)
 
     def run_update(self):
         process = QProcess(self)
@@ -266,8 +295,8 @@ class MainWindow(QWidget):
     def update_message(self):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText("You want to update?")
-        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setText(self.translate_language("You want to update?"))
+        self.msgBox.setWindowTitle(self.translate_language("Message"))
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
 
@@ -285,19 +314,19 @@ class MainWindow(QWidget):
     def warning_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setText(self.translate_language(user_message))
+        self.msgBox.setWindowTitle(self.translate_language("Message"))
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         button_adapt = self.msgBox.button(QMessageBox.StandardButton.Ok)
-        button_adapt.setText("Change username")
+        button_adapt.setText(self.translate_language("Change username"))
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
     def show_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setText(self.translate_language(user_message))
+        self.msgBox.setWindowTitle(self.translate_language("Message"))
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
@@ -305,8 +334,8 @@ class MainWindow(QWidget):
     def show_launch_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setText(self.translate_language(user_message))
+        self.msgBox.setWindowTitle(self.translate_language("Message"))
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.buttonClicked.connect(self.on_message_box_close)
@@ -337,6 +366,31 @@ class MainWindow(QWidget):
         settings['minecraft_directory'] = os.path.join(os.getenv('APPDATA'), '.launch')
         self.path_box.setText(settings['minecraft_directory'])
 
+    def open_directory(self):
+        if os.path.isdir(self.path_box.text()+'\\'+self.version_select.currentText()):
+            os.system("explorer "+self.path_box.text()+'\\'+self.version_select.currentText())
+        else:
+            self.show_message("Directory not exist")
+
+    def translate_language(self, word):
+        '''if settings['status']:
+            translator = Translator()
+            res = ''
+            config = configparser.ConfigParser()
+            config.read('config.ini')
+
+            if config["CONFIG"]["lang"] == 'English':
+                res = translator.translate(word, dest='en')
+            elif config["CONFIG"]["lang"] == 'Ukraine':
+                res = translator.translate(word, dest='uk')
+
+            return res.text
+        else:'''
+        return word
+
+    def translate_all_text(self):
+        pass
+
     def load_settings(self):
         configer.create_or_no_new_config()
 
@@ -359,6 +413,8 @@ class MainWindow(QWidget):
         self.warning_checkbox.setChecked(config["CONFIG"]["warning"] == "True")
         self.data_checkbox.setChecked(config["CONFIG"]["data"] == "True")
         self.jvm_box.setText(config["CONFIG"]["jvm"])
+        self.exit_checkbox.setChecked(config["CONFIG"]["exit"] == "True")
+        self.language_select.setCurrentText(config["CONFIG"]["lang"])
 
     def save_settings(self):
         configer.create_or_no_new_config()
@@ -378,6 +434,8 @@ class MainWindow(QWidget):
         config["CONFIG"]["data"] = "True" if self.data_checkbox.isChecked() else "False"
         config["CONFIG"]["warning"] = "True" if self.warning_checkbox.isChecked() else "False"
         config["CONFIG"]["jvm"] = self.jvm_box.text()
+        config['CONFIG']["exit"] = "True" if self.exit_checkbox.isChecked() else "False"
+        config["CONFIG"]["lang"] = self.language_select.currentText()
 
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -395,6 +453,8 @@ class MainWindow(QWidget):
         config["CONFIG"]["git"] = str(self.git_checkbox.isChecked())
         config["CONFIG"]["data"] = str(self.data_checkbox.isChecked())
         config["CONFIG"]["jvm"] = self.jvm_box.text()
+        config['CONFIG']["exit"] = str(self.exit_checkbox.isChecked())
+        config["CONFIG"]["lang"] = self.language_select.currentText()
 
         with open('config.ini', 'w') as configfile:
             config.write(configfile)
@@ -408,6 +468,8 @@ class MainWindow(QWidget):
         if self.launcher.status:
             self.show_launch_message("Minecraft is installed and starts")
             self.launcher.status = False
+            if self.exit_checkbox.isChecked():
+                self.close()
         self.launch_button.setDisabled(value)
         self.progress_bar.setVisible(not value)
 
@@ -419,6 +481,7 @@ class MainWindow(QWidget):
     def launch_minecraft(self):
         configer.create_or_no_new_config()
         configer.checker_config_params_to_exist()
+
         settings['version'] = self.version_select.currentText()
         options["username"] = self.username_edit.text()
 
@@ -456,3 +519,6 @@ class MainWindow(QWidget):
                 self.show_message("Minecraft is starting")
 
         self.launcher.start()
+
+        if self.exit_checkbox.isChecked() and file_work.read_version_and_check(settings['minecraft_directory']+'\\'+settings['version']):
+            self.close()
