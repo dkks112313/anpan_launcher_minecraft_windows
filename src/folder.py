@@ -7,9 +7,6 @@ def removing_folder_resources():
     folder_from = rf'{os.path.join(os.getcwd(), 'resources')}'
     folder_to = rf'{os.path.join(env.settings['minecraft_directory'], 'resources')}'
 
-    print(folder_from)
-    print(folder_to)
-
     for f in os.listdir(folder_from):
         if os.path.isfile(os.path.join(folder_from, f)):
             shutil.copy(os.path.join(folder_from, f), os.path.join(folder_to, f))

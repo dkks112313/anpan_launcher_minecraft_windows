@@ -7,9 +7,9 @@ import requests
 from PyQt6.QtCore import Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
-    QCheckBox, QFileDialog, QProgressBar, QMessageBox
+    QCheckBox, QFileDialog, QProgressBar, QMessageBox, QSlider
 
-from src import request, regex, git_work, file_work, status, configer
+from src import request, regex, git_work, file_work, status, configer, ram_user
 from src.env import *
 from src.random_image import random_image2
 from src.thread_launch import Launcher
@@ -30,6 +30,13 @@ class MainWindow(QWidget):
         self.img_pixmap = None
         self.image_layout = None
         self.save_count = None
+
+        self.ram_slider = QSlider(Qt.Orientation.Horizontal)
+        self.ram_slider.setMinimum(2)
+        self.ram_slider.setMaximum(ram_user.ram_size() * 10)
+        self.ram_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.ram_slider.setTickInterval(1)
+
         self.main_interface_layout = None
         self.jvm_box = QLineEdit()
         self.git_checkbox = QCheckBox()
@@ -76,8 +83,8 @@ class MainWindow(QWidget):
         else:
             settings['status'] = False
 
-        self.launch_button = QPushButton(self.translate_language("Launch"))
-        self.settings_button = QPushButton(self.translate_language("Settings"))
+        self.launch_button = QPushButton("Launch")
+        self.settings_button = QPushButton("Settings")
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setProperty("value", 0)
@@ -110,16 +117,16 @@ class MainWindow(QWidget):
         self.progress_bar.setStyleSheet("""
             QProgressBar {border: 2px solid grey;border-radius: 5px;text-align: center;}
             QProgressBar::chunk {background-color: #ffa500;width: 1px;margin: 0.5px;}
-            """)
+        """)
 
         bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(QLabel(self.translate_language("Version:")))
+        bottom_layout.addWidget(QLabel("Version:"))
         bottom_layout.addWidget(self.version_select)
         bottom_layout.addWidget(self.launch_button)
         bottom_layout.addWidget(self.settings_button)
 
         user_layout = QHBoxLayout()
-        user_layout.addWidget(QLabel(self.translate_language("Username:")))
+        user_layout.addWidget(QLabel("Username:"))
         user_layout.addWidget(self.username_edit)
 
         self.main_interface_layout.addStretch(1)
@@ -186,12 +193,12 @@ class MainWindow(QWidget):
         settings_layout = QVBoxLayout()
 
         path = QHBoxLayout()
-        path_label = QLabel(self.translate_language("Path"))
-        path_choice = QPushButton(self.translate_language("Choice"))
+        path_label = QLabel("Path")
+        path_choice = QPushButton("Choice")
         path_choice.clicked.connect(self.select_directory)
-        default_button = QPushButton(self.translate_language("Default"))
+        default_button = QPushButton("Default")
         default_button.clicked.connect(self.default_directory)
-        open_version_path = QPushButton(self.translate_language("Open"))
+        open_version_path = QPushButton("Open")
         open_version_path.clicked.connect(self.open_directory)
         path.addWidget(path_label)
         path.addWidget(self.path_box)
@@ -200,10 +207,10 @@ class MainWindow(QWidget):
         path.addWidget(open_version_path)
 
         java = QHBoxLayout()
-        java_label = QLabel(self.translate_language("Java"))
-        java_choice = QPushButton(self.translate_language("Choice"))
+        java_label = QLabel("Java")
+        java_choice = QPushButton("Choice")
         java_choice.clicked.connect(self.select_java)
-        java_default = QPushButton(self.translate_language("Default"))
+        java_default = QPushButton("Default")
         java_default.clicked.connect(self.default_java)
         java.addWidget(java_label)
         java.addWidget(self.java_box)
@@ -213,7 +220,18 @@ class MainWindow(QWidget):
         ram = QHBoxLayout()
         ram_slider_label = QLabel(f"RAM(mb): ")
         ram.addWidget(ram_slider_label)
+        ram.addWidget(self.ram_slider)
         ram.addWidget(self.ram_box)
+
+        '''labels_ram_layout = QHBoxLayout()
+
+        for i in range(2, ram_user.ram_size() + 1):
+            label = QLabel(str(i))
+            labels_ram_layout.addWidget(label)
+            label.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)'''
+
+        self.ram_slider.valueChanged.connect(self.update_line_edit)
+        self.ram_box.textChanged.connect(self.update_slider)
 
         jvm = QHBoxLayout()
         jvm_label = QLabel("JVM")
@@ -221,17 +239,17 @@ class MainWindow(QWidget):
         jvm.addWidget(self.jvm_box)
 
         git = QHBoxLayout()
-        git_lable = QLabel(self.translate_language("Auto Update"))
+        git_lable = QLabel("Auto Update")
         git.addWidget(git_lable)
         git.addWidget(self.git_checkbox)
 
         warning = QHBoxLayout()
-        warning_label = QLabel(self.translate_language("Warning"))
+        warning_label = QLabel("Warning")
         warning.addWidget(warning_label)
         warning.addWidget(self.warning_checkbox)
 
         console = QHBoxLayout()
-        console_label = QLabel(self.translate_language("Console"))
+        console_label = QLabel("Console")
         console.addWidget(console_label)
         console.addWidget(self.console_checkbox)
 
@@ -246,21 +264,21 @@ class MainWindow(QWidget):
         alpha.addWidget(self.alpha_checkbox)
 
         data = QHBoxLayout()
-        data_label = QLabel(self.translate_language("Data"))
+        data_label = QLabel("Data")
         data.addWidget(data_label)
         data.addWidget(self.data_checkbox)
 
         exit_launcher = QHBoxLayout()
-        exit_label = QLabel(self.translate_language("Exit"))
+        exit_label = QLabel("Exit")
         exit_launcher.addWidget(exit_label)
         exit_launcher.addWidget(self.exit_checkbox)
 
         language = QHBoxLayout()
-        language_label = QLabel(self.translate_language("Language"))
+        language_label = QLabel("Language")
         language.addWidget(language_label)
         language.addWidget(self.language_select)
 
-        back_button = QPushButton(self.translate_language("Back"))
+        back_button = QPushButton("Back")
         back_button.clicked.connect(self.show_main)
 
         settings_layout.addStretch(1)
@@ -268,6 +286,7 @@ class MainWindow(QWidget):
         settings_layout.addLayout(java)
         settings_layout.addLayout(ram)
         settings_layout.addLayout(jvm)
+        settings_layout.addLayout(language)
         settings_layout.addLayout(git)
         settings_layout.addLayout(warning)
         settings_layout.addLayout(console)
@@ -275,10 +294,21 @@ class MainWindow(QWidget):
         settings_layout.addLayout(alpha)
         settings_layout.addLayout(data)
         settings_layout.addLayout(exit_launcher)
-        settings_layout.addLayout(language)
         settings_layout.addWidget(back_button)
 
         self.settings_interface.setLayout(settings_layout)
+
+    def update_line_edit(self, value):
+        self.ram_box.blockSignals(True)
+        self.ram_box.setText(str(value * 100))
+        self.ram_box.blockSignals(False)
+
+    def update_slider(self, text):
+        if text.isdigit():
+            value = int(text) // 100
+            self.ram_slider.blockSignals(True)
+            self.ram_slider.setValue(value)
+            self.ram_slider.blockSignals(False)
 
     def run_update(self):
         process = QProcess(self)
@@ -288,8 +318,8 @@ class MainWindow(QWidget):
     def update_message(self):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(self.translate_language("You want to update?"))
-        self.msgBox.setWindowTitle(self.translate_language("Message"))
+        self.msgBox.setText("You want to update?")
+        self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
 
@@ -307,19 +337,19 @@ class MainWindow(QWidget):
     def warning_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(self.translate_language(user_message))
-        self.msgBox.setWindowTitle(self.translate_language("Message"))
+        self.msgBox.setText(user_message)
+        self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         button_adapt = self.msgBox.button(QMessageBox.StandardButton.Ok)
-        button_adapt.setText(self.translate_language("Change username"))
+        button_adapt.setText("Change username")
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
     def show_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(self.translate_language(user_message))
-        self.msgBox.setWindowTitle(self.translate_language("Message"))
+        self.msgBox.setText(user_message)
+        self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
@@ -327,8 +357,8 @@ class MainWindow(QWidget):
     def show_launch_message(self, user_message):
         self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText(self.translate_language(user_message))
-        self.msgBox.setWindowTitle(self.translate_language("Message"))
+        self.msgBox.setText(user_message)
+        self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.buttonClicked.connect(self.on_message_box_close)
@@ -372,13 +402,6 @@ class MainWindow(QWidget):
             os.system("explorer " + self.path_box.text() + '\\' + self.version_select.currentText())
         else:
             self.show_message("Directory not exist")
-
-    @staticmethod
-    def translate_language(word):
-        return word
-
-    def translate_all_text(self):
-        pass
 
     def load_settings(self):
         configer.create_or_no_new_config()
