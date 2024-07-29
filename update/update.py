@@ -1,5 +1,6 @@
 import sys
 import time
+import zip
 
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal, QProcess
@@ -33,7 +34,7 @@ class DownloadThread(QThread):
 
 class Window(QMainWindow):
     REPO = "dkks112313/An-Pan-Launcher"
-    ASSET_NAME = "An-Pan-Launcher.exe"
+    ASSET_NAME = "game-launcher.zip"
 
     def __init__(self):
         super().__init__()
@@ -83,13 +84,15 @@ class Window(QMainWindow):
     def update_progress(self, value):
         self.progress.setValue(value)
         if value == 100:
+            time.sleep(3)
+            zip.update_and_cleaning()
             time.sleep(5)
             self.run_main_app()
             self.close()
 
     def run_main_app(self):
         process = QProcess(self)
-        process.startDetached(self.ASSET_NAME)
+        process.startDetached("An-Pan-Launcher.exe")
 
 
 def main():

@@ -26,7 +26,7 @@ def create_or_no_new_config():
         config['CONFIG']['console'] = "False"
         config['CONFIG']['git'] = "True"
         config['CONFIG']['data'] = "False"
-        config['CONFIG']['warning'] = "False"
+        config['CONFIG']['warning'] = "True"
         config['CONFIG']['jvm'] = ""
         config['CONFIG']['exit'] = "False"
         config['CONFIG']['lang'] = "English"
