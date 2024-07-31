@@ -1,10 +1,8 @@
 import os
 import subprocess
-import time
-
 import minecraft_launcher_lib
+
 from PyQt6.QtCore import QThread, QWaitCondition, QMutex, pyqtSignal
-from PyQt6.QtWidgets import QMessageBox
 from src import file_work, folder
 from src.env import *
 
@@ -36,18 +34,21 @@ class Launcher(QThread):
         self.progress_max = value
         self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
 
-    def split_forge_version(self, text):
+    @staticmethod
+    def split_forge_version(text):
         lists = text.split('-')
         lists[0] += '-forge-'
         lists[0] += lists[1]
         return lists[0]
 
-    def split_fabric_version(self, text):
-        fabric = 'fabric-loader-'+minecraft_launcher_lib.fabric.get_latest_loader_version()+'-'+text
+    @staticmethod
+    def split_fabric_version(text):
+        fabric = 'fabric-loader-' + minecraft_launcher_lib.fabric.get_latest_loader_version() + '-' + text
         return fabric
 
-    def split_qulit_version(self, text):
-        qulit = 'quilt-loader-'+minecraft_launcher_lib.quilt.get_latest_loader_version()+'-'+text
+    @staticmethod
+    def split_qulit_version(text):
+        qulit = 'quilt-loader-' + minecraft_launcher_lib.quilt.get_latest_loader_version() + '-' + text
         return qulit
 
     def run(self):
@@ -76,9 +77,9 @@ class Launcher(QThread):
                                                                          minecraft_directory=
                                                                          settings['minecraft_directory'],
                                                                          callback={
-                                                                             'setStatus': self.update_progress_label,
-                                                                             'setProgress': self.update_progress,
-                                                                             'setMax': self.update_progress_max})
+                                                                         'setStatus': self.update_progress_label,
+                                                                         'setProgress': self.update_progress,
+                                                                         'setMax': self.update_progress_max})
                 folder.moving_folder_resources()
             elif settings['mods'] == "Forge":
                 minecraft_launcher_lib.forge.install_forge_version(settings['version'],
@@ -91,16 +92,16 @@ class Launcher(QThread):
                 minecraft_launcher_lib.fabric.install_fabric(settings['version'],
                                                              settings['minecraft_directory'],
                                                              callback={
-                                                                   'setStatus': self.update_progress_label,
-                                                                   'setProgress': self.update_progress,
-                                                                   'setMax': self.update_progress_max})
+                                                             'setStatus': self.update_progress_label,
+                                                             'setProgress': self.update_progress,
+                                                             'setMax': self.update_progress_max})
             elif settings['mods'] == "Qulit":
                 minecraft_launcher_lib.quilt.install_quilt(settings['version'],
                                                            settings['minecraft_directory'],
                                                            callback={
-                                                               'setStatus': self.update_progress_label,
-                                                               'setProgress': self.update_progress,
-                                                               'setMax': self.update_progress_max})
+                                                           'setStatus': self.update_progress_label,
+                                                           'setProgress': self.update_progress,
+                                                           'setMax': self.update_progress_max})
 
             self.state_signal.emit(False)
 
@@ -117,7 +118,9 @@ class Launcher(QThread):
                 options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
 
         version = ''
-        if settings['mods'] == "Forge":
+        if settings['mods'] == 'Vanilla':
+            version = settings['version']
+        elif settings['mods'] == "Forge":
             version = self.split_forge_version(settings['version'])
         elif settings['mods'] == 'Fabric':
             version = self.split_fabric_version(settings['version'])

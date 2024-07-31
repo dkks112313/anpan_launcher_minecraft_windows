@@ -2,15 +2,16 @@ import configparser
 import os
 import sys
 import time
-
 import minecraft_launcher_lib
+
 import requests
+from packaging import version
 from PyQt6.QtCore import Qt, QProcess
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox, QSlider
 
-from src import request, regex, git_work, file_work, status, configer, ram_user
+from src import request, regex, git_work, file_work, status, configer
 from src.env import *
 from src.random_image import random_image2
 from src.thread_launch import Launcher
@@ -34,7 +35,8 @@ class MainWindow(QWidget):
 
         self.ram_slider = QSlider(Qt.Orientation.Horizontal)
         self.ram_slider.setMinimum(2)
-        self.ram_slider.setMaximum(ram_user.ram_size() * 10)
+        #self.ram_slider.setMaximum(ram_user.ram_size() * 10)
+        self.ram_slider.setMaximum(16 * 10)
         self.ram_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.ram_slider.setTickInterval(1)
 
@@ -177,7 +179,7 @@ class MainWindow(QWidget):
         if status.check_internet_connection():
             if self.choice_mod.currentText() == "Vanilla":
                 if alpha and snapshot:
-                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    for version_info in src.minecraft_launcher_lib.utils.get_version_list():
                         self.version_select.addItem(version_info["id"])
                 elif alpha:
                     for version_info in minecraft_launcher_lib.utils.get_version_list():
@@ -192,7 +194,6 @@ class MainWindow(QWidget):
                         if version_info['type'] in ['release']:
                             self.version_select.addItem(version_info["id"])
             elif self.choice_mod.currentText() == "Forge":
-                from packaging import version
                 for version_info in minecraft_launcher_lib.forge.list_forge_versions():
                     app = ''
                     for i in version_info:

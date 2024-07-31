@@ -4,19 +4,23 @@ import zipfile
 
 
 def update_and_cleaning():
+    file_except = 'update.exe'
+
+    files_remove = os.listdir(os.getcwd())
+    for i in files_remove:
+        if os.path.isdir(i):
+            shutil.rmtree(f'{os.getcwd()}/{i}')
+
     with zipfile.ZipFile('game-launcher.zip', 'r') as zip_ref:
         zip_ref.extractall()
 
-    list_files = ['An-Pan-Launcher.exe', 'icon.ico', 'content', 'resources']
+    files = os.listdir(os.path.join(os.getcwd(), 'An-Pan-Launcher'))
 
-    if os.path.isdir(f'{os.getcwd()}/content'):
-        shutil.rmtree(f'{os.getcwd()}/content')
+    for file in files:
+        if file == file_except:
+            continue
 
-    if os.path.isdir(f'{os.getcwd()}/resources'):
-        shutil.rmtree(f'{os.getcwd()}/resources')
-
-    for i in list_files:
-        shutil.move(f'{os.getcwd()}/An-Pan-Launcher/{i}', f'{os.getcwd()}/{i}')
+        shutil.move(f'{os.getcwd()}/An-Pan-Launcher/{file}', f'{os.getcwd()}/{file}')
 
     shutil.rmtree(f'{os.getcwd()}/An-Pan-Launcher')
     os.system("del game-launcher.zip")
