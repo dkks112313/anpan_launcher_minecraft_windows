@@ -1,12 +1,12 @@
 import os
+from configparser import ConfigParser
+from pathlib import Path
 import chardet
 
 
 class FileLog:
-    def __init__(self, minecraft_directory):
-        self.path = os.path.join(minecraft_directory)
-
-    def read_version(self):
+    def read_version(self, minecraft_directory):
+        path = os.path.join(minecraft_directory)
         file = open('version', 'a', encoding='utf-8')
         file.close()
         file = open('version', 'r', encoding='utf-8')
@@ -14,15 +14,16 @@ class FileLog:
             line = file.readline()
             if not line:
                 break
-            if self.path + '\n' == line:
+            if path + '\n' == line:
                 file.close()
                 return False
         file.close()
         return True
 
-    def write_version(self):
+    def write_version(self, minecraft_directory):
+        path = os.path.join(minecraft_directory)
         with open('version', 'a', encoding='utf-8') as file:
-            file.writelines(str(self.path) + '\n')
+            file.writelines(str(path) + '\n')
             file.close()
 
 

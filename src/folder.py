@@ -3,7 +3,7 @@ from src import env
 import shutil
 
 
-def removing_folder_resources():
+def moving_folder_resources():
     folder_from = rf'{os.path.join(os.getcwd(), 'resources')}'
     folder_to = rf'{os.path.join(env.settings['minecraft_directory'], 'resources')}'
 

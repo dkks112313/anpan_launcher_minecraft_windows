@@ -21,6 +21,7 @@ def create_or_no_new_config():
         config['CONFIG']['ram'] = "4096"
         config['CONFIG']['snapshot'] = "False"
         config['CONFIG']['alpha'] = "False"
+        config['CONFIG']['mode'] = "Vanilla"
         config['CONFIG']['directory'] = ""
         config['CONFIG']['java'] = ""
         config['CONFIG']['console'] = "False"
@@ -49,6 +50,7 @@ def checker_config_params_to_exist():
         "ram": "4096",
         "snapshot": "False",
         "alpha": "False",
+        "mode": "Vanilla",
         "directory": os.path.join(os.getenv('APPDATA'), '.launch'),
         "java": "",
         "console": "False",

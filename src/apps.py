@@ -1,6 +1,7 @@
 import configparser
 import os
 import sys
+import time
 
 import minecraft_launcher_lib
 import requests
@@ -50,6 +51,8 @@ class MainWindow(QWidget):
         self.java_box = QLineEdit()
         self.java_box.setReadOnly(True)
         self.version_select = QComboBox()
+        self.choice_mod = QComboBox()
+        self.choice_mod.addItems(["Vanilla", "Forge", "Fabric", "Qulit"])
         self.username_edit = QLineEdit()
         self.exit_checkbox = QCheckBox()
         self.launcher = Launcher()
@@ -97,6 +100,7 @@ class MainWindow(QWidget):
 
         self.snapshot_checkbox.stateChanged.connect(self.update_version_list)
         self.alpha_checkbox.stateChanged.connect(self.update_version_list)
+        self.choice_mod.currentTextChanged.connect(self.update_version_list)
 
         self.load_settings()
 
@@ -122,6 +126,7 @@ class MainWindow(QWidget):
         bottom_layout = QHBoxLayout()
         bottom_layout.addWidget(QLabel("Version:"))
         bottom_layout.addWidget(self.version_select)
+        bottom_layout.addWidget(self.choice_mod)
         bottom_layout.addWidget(self.launch_button)
         bottom_layout.addWidget(self.settings_button)
 
@@ -138,6 +143,7 @@ class MainWindow(QWidget):
 
         self.username_edit.textChanged.connect(self.save_settings)
         self.version_select.currentTextChanged.connect(self.save_settings)
+        self.choice_mod.currentTextChanged.connect(self.save_settings)
 
         self.main_interface.setVisible(True)
         self.settings_interface.setVisible(False)
@@ -169,21 +175,42 @@ class MainWindow(QWidget):
         file_work.check_version_list()
 
         if status.check_internet_connection():
-            if alpha and snapshot:
-                for version_info in minecraft_launcher_lib.utils.get_version_list():
-                    self.version_select.addItem(version_info["id"])
-            elif alpha:
-                for version_info in minecraft_launcher_lib.utils.get_version_list():
-                    if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
-                        self.version_select.addItem(version_info['id'])
-            elif snapshot:
-                for version_info in minecraft_launcher_lib.utils.get_version_list():
-                    if version_info['type'] in ['snapshot', 'release']:
-                        self.version_select.addItem(version_info['id'])
-            else:
-                for version_info in minecraft_launcher_lib.utils.get_version_list():
-                    if version_info['type'] in ['release']:
+            if self.choice_mod.currentText() == "Vanilla":
+                if alpha and snapshot:
+                    for version_info in minecraft_launcher_lib.utils.get_version_list():
                         self.version_select.addItem(version_info["id"])
+                elif alpha:
+                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                        if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
+                            self.version_select.addItem(version_info['id'])
+                elif snapshot:
+                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                        if version_info['type'] in ['snapshot', 'release']:
+                            self.version_select.addItem(version_info['id'])
+                else:
+                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                        if version_info['type'] in ['release']:
+                            self.version_select.addItem(version_info["id"])
+            elif self.choice_mod.currentText() == "Forge":
+                from packaging import version
+                for version_info in minecraft_launcher_lib.forge.list_forge_versions():
+                    app = ''
+                    for i in version_info:
+                        if i == '-':
+                            break
+                        else:
+                            app += i
+
+                    if not (version.parse('1.1') <= version.parse(app) <= version.parse('1.12.2')):
+                        self.version_select.addItem(version_info)
+            elif self.choice_mod.currentText() == "Fabric":
+                for version_info in minecraft_launcher_lib.fabric.get_all_minecraft_versions():
+                    if minecraft_launcher_lib.fabric.is_minecraft_version_supported(version_info['version']):
+                        self.version_select.addItem(version_info['version'])
+            elif self.choice_mod.currentText() == "Qulit":
+                for version_info in minecraft_launcher_lib.quilt.get_all_minecraft_versions():
+                    if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']):
+                        self.version_select.addItem(version_info['version'])
         else:
             self.progress_bar.setVisible(False)
             for version_item in file_work.get_version_list():
@@ -414,6 +441,7 @@ class MainWindow(QWidget):
         self.ram_box.setText(config["CONFIG"]["ram"])
         self.snapshot_checkbox.setChecked(config["CONFIG"]["snapshot"] == "True")
         self.alpha_checkbox.setChecked(config["CONFIG"]["alpha"] == "True")
+        self.choice_mod.setCurrentText(config["CONFIG"]["mode"])
         if config['CONFIG']['directory'] == "":
             self.path_box.setText(os.path.join(os.getenv('APPDATA'), '.launch'))
         else:
@@ -439,6 +467,7 @@ class MainWindow(QWidget):
         config["CONFIG"]["ram"] = self.ram_box.text()
         config["CONFIG"]["snapshot"] = "True" if self.snapshot_checkbox.isChecked() else "False"
         config["CONFIG"]["alpha"] = "True" if self.alpha_checkbox.isChecked() else "False"
+        config["CONFIG"]["mode"] = self.choice_mod.currentText()
         config['CONFIG']['directory'] = self.path_box.text()
         config['CONFIG']['java'] = self.java_box.text()
         config["CONFIG"]["console"] = "True" if self.console_checkbox.isChecked() else "False"
@@ -460,6 +489,7 @@ class MainWindow(QWidget):
         config["CONFIG"]["ram"] = self.ram_box.text()
         config["CONFIG"]["snapshot"] = str(self.snapshot_checkbox.isChecked())
         config["CONFIG"]["alpha"] = str(self.alpha_checkbox.isChecked())
+        config["CONFIG"]["mode"] = self.choice_mod.currentText()
         config["CONFIG"]["directory"] = self.path_box.text()
         config['CONFIG']['java'] = self.java_box.text()
         config["CONFIG"]["console"] = str(self.console_checkbox.isChecked())
@@ -480,6 +510,7 @@ class MainWindow(QWidget):
     def state_progress(self, value):
         if self.launcher.status:
             self.show_launch_message("Minecraft is installed and starts")
+            time.sleep(5)
             self.launcher.status = False
             if self.exit_checkbox.isChecked():
                 self.close()
@@ -526,6 +557,7 @@ class MainWindow(QWidget):
         settings['snapshot'] = self.snapshot_checkbox.isChecked()
         settings['data'] = self.data_checkbox.isChecked()
         settings['git'] = self.git_checkbox.isChecked()
+        settings['mods'] = self.choice_mod.currentText()
 
         if status.check_internet_connection():
             if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):

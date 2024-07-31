@@ -10,6 +10,11 @@ options = {
 }
 
 
+def split_fabric_version(text):
+    lists = 'fabric-loader-0.16.0-'+text
+    return lists
+
+
 def main():
     vanilla_version = input("Select the Minecraft version for which you want to install fabric:")
 
@@ -25,7 +30,7 @@ def main():
                                                  minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
                                                  callback=callback)
 
-    command = minecraft_launcher_lib.command.get_minecraft_command('fabric-loader-0.16.0-1.21',
+    command = minecraft_launcher_lib.command.get_minecraft_command(split_fabric_version(vanilla_version),
                                                                    minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
                                                                    options=options)
 

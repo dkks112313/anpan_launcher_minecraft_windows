@@ -1,5 +1,7 @@
 import os
 import subprocess
+import time
+
 import minecraft_launcher_lib
 from PyQt6.QtCore import QThread, QWaitCondition, QMutex, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
@@ -34,6 +36,20 @@ class Launcher(QThread):
         self.progress_max = value
         self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
 
+    def split_forge_version(self, text):
+        lists = text.split('-')
+        lists[0] += '-forge-'
+        lists[0] += lists[1]
+        return lists[0]
+
+    def split_fabric_version(self, text):
+        fabric = 'fabric-loader-'+minecraft_launcher_lib.fabric.get_latest_loader_version()+'-'+text
+        return fabric
+
+    def split_qulit_version(self, text):
+        qulit = 'quilt-loader-'+minecraft_launcher_lib.quilt.get_latest_loader_version()+'-'+text
+        return qulit
+
     def run(self):
         self.state_signal.emit(True)
 
@@ -49,18 +65,42 @@ class Launcher(QThread):
         else:
             settings['minecraft_directory'] += f'\\{settings['version']}'
 
-        file = file_work.FileLog(minecraft_directory=settings['minecraft_directory'])
+        file = file_work.FileLog()
 
         minecraft_directory = settings['minecraft_directory']
-        if file.read_version():
-            file.write_version()
+        if file.read_version(minecraft_directory):
+            file.write_version(minecraft_directory)
             self.status = True
-            minecraft_launcher_lib.install.install_minecraft_version(versionid=settings['version'],
-                                                                     minecraft_directory=
-                                                                     settings['minecraft_directory'],
-                                                                     callback={'setStatus': self.update_progress_label,
-                                                                               'setProgress': self.update_progress,
-                                                                               'setMax': self.update_progress_max})
+            if settings['mods'] == "Vanilla":
+                minecraft_launcher_lib.install.install_minecraft_version(versionid=settings['version'],
+                                                                         minecraft_directory=
+                                                                         settings['minecraft_directory'],
+                                                                         callback={
+                                                                             'setStatus': self.update_progress_label,
+                                                                             'setProgress': self.update_progress,
+                                                                             'setMax': self.update_progress_max})
+                folder.moving_folder_resources()
+            elif settings['mods'] == "Forge":
+                minecraft_launcher_lib.forge.install_forge_version(settings['version'],
+                                                                   settings['minecraft_directory'],
+                                                                   callback={
+                                                                   'setStatus': self.update_progress_label,
+                                                                   'setProgress': self.update_progress,
+                                                                   'setMax': self.update_progress_max})
+            elif settings['mods'] == "Fabric":
+                minecraft_launcher_lib.fabric.install_fabric(settings['version'],
+                                                             settings['minecraft_directory'],
+                                                             callback={
+                                                                   'setStatus': self.update_progress_label,
+                                                                   'setProgress': self.update_progress,
+                                                                   'setMax': self.update_progress_max})
+            elif settings['mods'] == "Qulit":
+                minecraft_launcher_lib.quilt.install_quilt(settings['version'],
+                                                           settings['minecraft_directory'],
+                                                           callback={
+                                                               'setStatus': self.update_progress_label,
+                                                               'setProgress': self.update_progress,
+                                                               'setMax': self.update_progress_max})
 
             self.state_signal.emit(False)
 
@@ -68,16 +108,23 @@ class Launcher(QThread):
             self.wait_condition.wait(self.mutex)
             self.mutex.unlock()
 
-            folder.removing_folder_resources()
+        if len(settings['version']) >= 6:
+            if settings['version'][:6] == '1.16.5':
+                options['jvmArguments'].append('-Dminecraft.api.env=custom')
+                options['jvmArguments'].append('-Dminecraft.api.auth.host=https://invalid.invalid/')
+                options['jvmArguments'].append('-Dminecraft.api.account.host=https://invalid.invalid/')
+                options['jvmArguments'].append('-Dminecraft.api.session.host=https://invalid.invalid/')
+                options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
 
-        if settings['version'] == '1.16.5':
-            options['jvmArguments'].append('-Dminecraft.api.env=custom')
-            options['jvmArguments'].append('-Dminecraft.api.auth.host=https://invalid.invalid/')
-            options['jvmArguments'].append('-Dminecraft.api.account.host=https://invalid.invalid/')
-            options['jvmArguments'].append('-Dminecraft.api.session.host=https://invalid.invalid/')
-            options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
+        version = ''
+        if settings['mods'] == "Forge":
+            version = self.split_forge_version(settings['version'])
+        elif settings['mods'] == 'Fabric':
+            version = self.split_fabric_version(settings['version'])
+        elif settings['mods'] == 'Qulit':
+            version = self.split_qulit_version(settings['version'])
 
-        command = minecraft_launcher_lib.command.get_minecraft_command(version=settings['version'],
+        command = minecraft_launcher_lib.command.get_minecraft_command(version=version,
                                                                        minecraft_directory=
                                                                        minecraft_directory,
                                                                        options=options)
