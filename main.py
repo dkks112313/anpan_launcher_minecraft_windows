@@ -1,5 +1,5 @@
 import sys
-from src import apps
+from src import apps, check_hours_to_update
 from PyQt6.QtWidgets import QApplication
 
 

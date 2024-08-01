@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import minecraft_launcher_lib
+import json
 
 import requests
 from packaging import version
@@ -178,38 +179,42 @@ class MainWindow(QWidget):
 
         if status.check_internet_connection():
             if self.choice_mod.currentText() == "Vanilla":
+                with open('version_vanilla.json', 'r', encoding='utf-8') as file_vanilla:
+                    vanilla = json.load(file_vanilla)
+
                 if alpha and snapshot:
-                    for version_info in src.minecraft_launcher_lib.utils.get_version_list():
+                    for version_info in vanilla:
                         self.version_select.addItem(version_info["id"])
                 elif alpha:
-                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    for version_info in vanilla:
                         if version_info['type'] in ['old_alpha', 'old_beta', 'release']:
                             self.version_select.addItem(version_info['id'])
                 elif snapshot:
-                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    for version_info in vanilla:
                         if version_info['type'] in ['snapshot', 'release']:
                             self.version_select.addItem(version_info['id'])
                 else:
-                    for version_info in minecraft_launcher_lib.utils.get_version_list():
+                    for version_info in vanilla:
                         if version_info['type'] in ['release']:
                             self.version_select.addItem(version_info["id"])
             elif self.choice_mod.currentText() == "Forge":
-                for version_info in minecraft_launcher_lib.forge.list_forge_versions():
-                    app = ''
-                    for i in version_info:
-                        if i == '-':
-                            break
-                        else:
-                            app += i
+                with open('version_forge.json', 'r', encoding='utf-8') as file_forge:
+                    forges = json.load(file_forge)
 
-                    if not (version.parse('1.1') <= version.parse(app) <= version.parse('1.12.2')):
-                        self.version_select.addItem(version_info)
+                for version_info in forges:
+                    self.version_select.addItem(version_info)
             elif self.choice_mod.currentText() == "Fabric":
-                for version_info in minecraft_launcher_lib.fabric.get_all_minecraft_versions():
+                with open('version_fabric.json', 'r', encoding='utf-8') as file_fabric:
+                    fabrics = json.load(file_fabric)
+
+                for version_info in fabrics:
                     if minecraft_launcher_lib.fabric.is_minecraft_version_supported(version_info['version']):
                         self.version_select.addItem(version_info['version'])
             elif self.choice_mod.currentText() == "Qulit":
-                for version_info in minecraft_launcher_lib.quilt.get_all_minecraft_versions():
+                with open('version_qulit.json', 'r', encoding='utf-8') as file_qulit:
+                    qulits = json.load(file_qulit)
+
+                for version_info in qulits:
                     if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']):
                         self.version_select.addItem(version_info['version'])
         else:
