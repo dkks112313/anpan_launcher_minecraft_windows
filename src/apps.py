@@ -1,5 +1,6 @@
 import configparser
 import os
+import subprocess
 import sys
 import time
 import minecraft_launcher_lib
@@ -432,7 +433,7 @@ class MainWindow(QWidget):
 
     def open_directory(self):
         if os.path.isdir(self.path_box.text() + '\\' + self.version_select.currentText()):
-            os.system("explorer " + self.path_box.text() + '\\' + self.version_select.currentText())
+            subprocess.Popen("explorer " + self.path_box.text() + '\\' + self.version_select.currentText(), creationflags=subprocess.CREATE_NO_WINDOW)
         else:
             self.show_message("Directory not exist")
 

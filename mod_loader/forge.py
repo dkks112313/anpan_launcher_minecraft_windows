@@ -30,27 +30,27 @@ def split_forge_version(text):
 def main():
     vanilla_version = input("Select the Minecraft version for which you want to install forge:")
 
-    forge_version = src.minecraft_launcher_lib.forge.find_forge_version(vanilla_version)
+    forge_version = minecraft_launcher_lib.forge.find_forge_version(vanilla_version)
 
     if forge_version is None:
         print("This Minecraft version is not supported by forge")
         sys.exit(0)
 
-    if src.minecraft_launcher_lib.forge.supports_automatic_install(forge_version):
+    if minecraft_launcher_lib.forge.supports_automatic_install(forge_version):
         if ask_yes_no(f"Do you want to install forge {forge_version}?"):
-            minecraft_directory = src.minecraft_launcher_lib.utils.get_minecraft_directory()
+            minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory()
             callback = {
                 "setStatus": lambda text: print(text)
             }
-            src.minecraft_launcher_lib.forge.install_forge_version(forge_version, minecraft_directory, callback=callback)
+            minecraft_launcher_lib.forge.install_forge_version(forge_version, minecraft_directory, callback=callback)
     else:
         print(f"Forge {forge_version} can't be installed automatic.")
         if ask_yes_no("Do you want to run the installer?"):
-            src.minecraft_launcher_lib.forge.run_forge_installer(forge_version)
+            minecraft_launcher_lib.forge.run_forge_installer(forge_version)
 
-    command = src.minecraft_launcher_lib.command.get_minecraft_command(version=split_forge_version(forge_version),
-                                                                       minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
-                                                                       options=options)
+    command = minecraft_launcher_lib.command.get_minecraft_command(version=split_forge_version(forge_version),
+                                                                   minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
+                                                                   options=options)
 
     subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
 
