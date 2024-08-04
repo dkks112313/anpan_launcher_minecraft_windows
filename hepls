@@ -1,0 +1,19 @@
+main.py:
+===========================================================================================================================================================
+python -m nuitka --standalone --onefile --follow-imports --windows-icon-from-ico=icon.ico --plugin-enable=pyqt6 --include-data-dir=C:\Users\ovcha\PycharmProjects\launcher_minecraft\\minecraft_launcher_lib=minecraft_launcher_lib --output-dir=output --output-filename=main.exe main.py
+===========================================================================================================================================================
+
+update.py:
+===========================================================================================================================================================
+python -m nuitka --standalone --onefile --follow-imports --plugin-enable=pyqt6 --output-dir=../output --output-filename=update.exe update.py
+===========================================================================================================================================================
+
+--windows-console-mode=disable
+------------------------------------------------------------------------------------------------------------------------------------------
+build.bat:
+venv\Scripts\activate
+python -m nuitka --standalone --onefile --follow-imports --windows-icon-from-ico=icon.ico --plugin-enable=pyqt6 --include-data-dir=C:\Users\ovcha\PycharmProjects\launcher_minecraft\\minecraft_launcher_lib=minecraft_launcher_lib --output-dir=An-Pan-Launcher --output-filename=main.exe main.py
+cd update
+python -m nuitka --standalone --onefile --follow-imports --plugin-enable=pyqt6 --output-dir=../An-Pan-Launcher --output-filename=upk.exe update.py
+cd ../An-Pan-Launcher
+deactivate
