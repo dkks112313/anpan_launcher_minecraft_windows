@@ -60,11 +60,30 @@ class Launcher(QThread):
         appdata = os.getenv('APPDATA')
         os.makedirs(os.path.join(appdata, '.launch'), exist_ok=True)
 
-        if settings['minecraft_directory'] == '':
-            os.makedirs(os.path.join(appdata, '.launch\\', settings['version']), exist_ok=True)
-            settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+        if settings['mods'] == 'Forge':
+            if settings['minecraft_directory'] == '':
+                os.makedirs(os.path.join(appdata, '.launch\\', f'Forge {settings['version']}'), exist_ok=True)
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+            else:
+                settings['minecraft_directory'] += f'\\Forge {settings['version']}'
+        elif settings['mods'] == 'Fabric':
+            if settings['minecraft_directory'] == '':
+                os.makedirs(os.path.join(appdata, '.launch\\', f'Fabric {settings['version']}'), exist_ok=True)
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+            else:
+                settings['minecraft_directory'] += f'\\Fabric {settings['version']}'
+        elif settings['mods'] == 'Qulit':
+            if settings['minecraft_directory'] == '':
+                os.makedirs(os.path.join(appdata, '.launch\\', f'Qulit {settings['version']}'), exist_ok=True)
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+            else:
+                settings['minecraft_directory'] += f'\\Qulit {settings['version']}'
         else:
-            settings['minecraft_directory'] += f'\\{settings['version']}'
+            if settings['minecraft_directory'] == '':
+                os.makedirs(os.path.join(appdata, '.launch\\', settings['version']), exist_ok=True)
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+            else:
+                settings['minecraft_directory'] += f'\\{settings['version']}'
 
         file = file_work.FileLog()
 
@@ -82,7 +101,7 @@ class Launcher(QThread):
                                                                          'setMax': self.update_progress_max})
                 folder.moving_folder_resources()
             elif settings['mods'] == "Forge":
-                minecraft_launcher_lib.forge.install_forge_version(settings['version'],
+                minecraft_launcher_lib.forge.install_forge_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']),
                                                                    settings['minecraft_directory'],
                                                                    callback={
                                                                    'setStatus': self.update_progress_label,
@@ -126,7 +145,7 @@ class Launcher(QThread):
         if settings['mods'] == 'Vanilla':
             version = settings['version']
         elif settings['mods'] == "Forge":
-            version = self.split_forge_version(settings['version'])
+            version = minecraft_launcher_lib.forge.forge_to_installed_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']))
         elif settings['mods'] == 'Fabric':
             version = self.split_fabric_version(settings['version'])
         elif settings['mods'] == 'Qulit':

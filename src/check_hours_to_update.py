@@ -38,13 +38,23 @@ def should_run_task():
     return datetime.now() - last_execution >= timedelta(days=1)
 
 
+def split_forge(versio):
+    app = ''
+    for i in versio:
+        if i == '-':
+            break
+        app += i
+
+    return app
+
+
 def checking_json():
     version_vanilla = minecraft_launcher_lib.utils.get_version_list()
 
     version_forge = []
     for version_info in minecraft_launcher_lib.utils.get_version_list():
         if minecraft_launcher_lib.forge.find_forge_version(version_info['id']):
-            version_forge.append(minecraft_launcher_lib.forge.find_forge_version(version_info['id']))
+            version_forge.append(split_forge(minecraft_launcher_lib.forge.find_forge_version(version_info['id'])))
     '''for version_info in minecraft_launcher_lib.forge.list_forge_versions():
         app = ''
         for i in version_info:

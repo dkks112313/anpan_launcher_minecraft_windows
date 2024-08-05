@@ -578,12 +578,35 @@ class MainWindow(QWidget):
         settings['mods'] = self.choice_mod.currentText()
 
         if status.check_internet_connection():
-            if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
-                if os.path.isdir(settings['minecraft_directory'] + '\\' + settings['version']):
-                    self.show_message("Minecraft is starting")
+            if settings['mods'] == 'Forge':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
+                    if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
+                        self.show_message("Minecraft is starting")
+            elif settings['mods'] == 'Fabric':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
+                    if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
+                        self.show_message("Minecraft is starting")
+            elif settings['mods'] == 'Qulit':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
+                    if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
+                        self.show_message("Minecraft is starting")
+            else:
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
+                    if os.path.isdir(settings['minecraft_directory'] + '\\' + settings['version']):
+                        self.show_message("Minecraft is starting")
         else:
-            if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
-                self.show_message("Minecraft is starting")
+            if settings['mods'] == 'Forge':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
+                    self.show_message("Minecraft is starting")
+            elif settings['mods'] == 'Fabric':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
+                    self.show_message("Minecraft is starting")
+            elif settings['mods'] == 'Qulit':
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
+                    self.show_message("Minecraft is starting")
+            else:
+                if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
+                    self.show_message("Minecraft is starting")
 
         self.launcher.start()
 
