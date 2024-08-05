@@ -4,7 +4,7 @@ import zipfile
 
 
 def update_and_cleaning():
-    file_except = 'update.exe'
+    file_except = 'upk.exe'
 
     files_remove = os.listdir(os.getcwd())
     for i in files_remove:
