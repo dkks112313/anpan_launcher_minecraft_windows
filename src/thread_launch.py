@@ -87,21 +87,24 @@ class Launcher(QThread):
                                                                    callback={
                                                                    'setStatus': self.update_progress_label,
                                                                    'setProgress': self.update_progress,
-                                                                   'setMax': self.update_progress_max})
+                                                                   'setMax': self.update_progress_max},
+                                                                   java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
             elif settings['mods'] == "Fabric":
                 minecraft_launcher_lib.fabric.install_fabric(settings['version'],
                                                              settings['minecraft_directory'],
                                                              callback={
                                                              'setStatus': self.update_progress_label,
                                                              'setProgress': self.update_progress,
-                                                             'setMax': self.update_progress_max})
+                                                             'setMax': self.update_progress_max},
+                                                             java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
             elif settings['mods'] == "Qulit":
                 minecraft_launcher_lib.quilt.install_quilt(settings['version'],
                                                            settings['minecraft_directory'],
                                                            callback={
                                                            'setStatus': self.update_progress_label,
                                                            'setProgress': self.update_progress,
-                                                           'setMax': self.update_progress_max})
+                                                           'setMax': self.update_progress_max},
+                                                           java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
 
             self.state_signal.emit(False)
 

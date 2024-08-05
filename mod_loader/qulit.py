@@ -1,6 +1,7 @@
 import sys
 import subprocess
 import uuid
+import minecraft_launcher_lib
 
 options = {
     'username': 'denchi',
