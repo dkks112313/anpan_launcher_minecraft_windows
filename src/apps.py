@@ -95,6 +95,7 @@ class MainWindow(QWidget):
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setProperty("value", 0)
+        self.progress_bar.setVisible(False)
 
         self.launch_button.clicked.connect(self.launch_minecraft)
         self.settings_button.clicked.connect(self.show_settings)
@@ -177,6 +178,7 @@ class MainWindow(QWidget):
         snapshot = self.snapshot_checkbox.isChecked()
 
         file_work.check_version_list()
+        #self.progress_bar.setVisible(False)
 
         if status.check_internet_connection():
             if self.choice_mod.currentText() == "Vanilla":
@@ -229,7 +231,6 @@ class MainWindow(QWidget):
                         if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']) and version_info['stable']:
                             self.version_select.addItem(version_info['version'])
         else:
-            self.progress_bar.setVisible(False)
             for version_item in file_work.get_version_list():
                 self.version_select.addItem(version_item)
 
@@ -525,15 +526,16 @@ class MainWindow(QWidget):
         event.accept()
 
     def state_progress(self, value):
+        self.launch_button.setDisabled(value)
+        #self.progress_bar.setVisible(not value)
+
         if self.launcher.status:
             self.show_launch_message("Minecraft is installed and starts")
+            self.progress_bar.setVisible(False)
             time.sleep(5)
             self.launcher.status = False
             if self.exit_checkbox.isChecked():
                 self.close()
-
-        self.launch_button.setDisabled(value)
-        self.progress_bar.setVisible(not value)
 
     def update_progress(self, progress, max_progress):
         self.progress_bar.setVisible(True)

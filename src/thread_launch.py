@@ -89,6 +89,8 @@ class Launcher(QThread):
                                                                    'setProgress': self.update_progress,
                                                                    'setMax': self.update_progress_max},
                                                                    java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
+                self.progress = self.progress_max
+                self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
             elif settings['mods'] == "Fabric":
                 minecraft_launcher_lib.fabric.install_fabric(settings['version'],
                                                              settings['minecraft_directory'],
