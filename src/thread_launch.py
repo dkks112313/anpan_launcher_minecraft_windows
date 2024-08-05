@@ -63,19 +63,19 @@ class Launcher(QThread):
         if settings['mods'] == 'Forge':
             if settings['minecraft_directory'] == '':
                 os.makedirs(os.path.join(appdata, '.launch\\', f'Forge {settings['version']}'), exist_ok=True)
-                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', f'Forge {settings['version']}')
             else:
                 settings['minecraft_directory'] += f'\\Forge {settings['version']}'
         elif settings['mods'] == 'Fabric':
             if settings['minecraft_directory'] == '':
                 os.makedirs(os.path.join(appdata, '.launch\\', f'Fabric {settings['version']}'), exist_ok=True)
-                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', f'Fabric {settings['version']}')
             else:
                 settings['minecraft_directory'] += f'\\Fabric {settings['version']}'
         elif settings['mods'] == 'Qulit':
             if settings['minecraft_directory'] == '':
                 os.makedirs(os.path.join(appdata, '.launch\\', f'Qulit {settings['version']}'), exist_ok=True)
-                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', settings['version'])
+                settings['minecraft_directory'] = os.path.join(appdata, '.launch\\', f'Qulit {settings['version']}')
             else:
                 settings['minecraft_directory'] += f'\\Qulit {settings['version']}'
         else:
