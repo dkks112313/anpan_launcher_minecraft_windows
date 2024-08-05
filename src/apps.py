@@ -527,7 +527,6 @@ class MainWindow(QWidget):
 
     def state_progress(self, value):
         self.launch_button.setDisabled(value)
-        #self.progress_bar.setVisible(not value)
 
         if self.launcher.status:
             self.show_launch_message("Minecraft is installed and starts")
