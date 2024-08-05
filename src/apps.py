@@ -208,16 +208,26 @@ class MainWindow(QWidget):
                 with open('version_fabric.json', 'r', encoding='utf-8') as file_fabric:
                     fabrics = json.load(file_fabric)
 
-                for version_info in fabrics:
-                    if minecraft_launcher_lib.fabric.is_minecraft_version_supported(version_info['version']):
-                        self.version_select.addItem(version_info['version'])
+                if snapshot:
+                    for version_info in fabrics:
+                        if minecraft_launcher_lib.fabric.is_minecraft_version_supported(version_info['version']):
+                            self.version_select.addItem(version_info['version'])
+                else:
+                    for version_info in fabrics:
+                        if minecraft_launcher_lib.fabric.is_minecraft_version_supported(version_info['version']) and version_info['stable']:
+                            self.version_select.addItem(version_info['version'])
             elif self.choice_mod.currentText() == "Qulit":
                 with open('version_qulit.json', 'r', encoding='utf-8') as file_qulit:
                     qulits = json.load(file_qulit)
 
-                for version_info in qulits:
-                    if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']):
-                        self.version_select.addItem(version_info['version'])
+                if snapshot:
+                    for version_info in qulits:
+                        if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']):
+                            self.version_select.addItem(version_info['version'])
+                else:
+                    for version_info in qulits:
+                        if minecraft_launcher_lib.quilt.is_minecraft_version_supported(version_info['version']) and version_info['stable']:
+                            self.version_select.addItem(version_info['version'])
         else:
             self.progress_bar.setVisible(False)
             for version_item in file_work.get_version_list():
