@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import uuid
+import minecraft_launcher_lib
 
 options = {
     'username': 'denchi',
@@ -48,7 +49,7 @@ def main():
         if ask_yes_no("Do you want to run the installer?"):
             minecraft_launcher_lib.forge.run_forge_installer(forge_version)
 
-    command = minecraft_launcher_lib.command.get_minecraft_command(version=split_forge_version(forge_version),
+    command = minecraft_launcher_lib.command.get_minecraft_command(version=minecraft_launcher_lib.forge.forge_to_installed_version(forge_version),
                                                                    minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
                                                                    options=options)
 

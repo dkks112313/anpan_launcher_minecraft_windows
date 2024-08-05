@@ -1,6 +1,7 @@
 import sys
 import subprocess
 import uuid
+import minecraft_launcher_lib
 
 options = {
     'username': 'denchi',
@@ -17,7 +18,7 @@ def split_fabric_version(text):
 def main():
     vanilla_version = input("Select the Minecraft version for which you want to install fabric:")
 
-    if not src.minecraft_launcher_lib.fabric.is_minecraft_version_supported(vanilla_version):
+    if not minecraft_launcher_lib.fabric.is_minecraft_version_supported(vanilla_version):
         print("This version is not supported by fabric")
         sys.exit(0)
 
@@ -25,13 +26,13 @@ def main():
         "setStatus": lambda text: print(text)
     }
 
-    src.minecraft_launcher_lib.fabric.install_fabric(vanilla_version,
-                                                     minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
-                                                     callback=callback)
+    minecraft_launcher_lib.fabric.install_fabric(vanilla_version,
+                                                 minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
+                                                 callback=callback)
 
-    command = src.minecraft_launcher_lib.command.get_minecraft_command(split_fabric_version(vanilla_version),
-                                                                       minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
-                                                                       options=options)
+    command = minecraft_launcher_lib.command.get_minecraft_command(split_fabric_version(vanilla_version),
+                                                                   minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
+                                                                   options=options)
 
     subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
 
