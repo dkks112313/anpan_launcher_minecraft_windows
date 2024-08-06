@@ -182,7 +182,7 @@ class MainWindow(QWidget):
         if status.check_internet_connection():
             if self.choice_mod.currentText() == "Vanilla":
                 with open('version_vanilla.json', 'r', encoding='utf-8') as file_vanilla:
-                    vanilla = json.load(file_vanilla)h
+                    vanilla = json.load(file_vanilla)
 
                 if alpha and snapshot:
                     for version_info in vanilla:
