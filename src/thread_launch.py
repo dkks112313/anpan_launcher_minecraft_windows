@@ -1,6 +1,8 @@
 import os
 import subprocess
 import minecraft_launcher_lib
+import platform
+from packaging import version
 
 from PyQt6.QtCore import QThread, QWaitCondition, QMutex, pyqtSignal
 from src import file_work, folder
@@ -87,6 +89,35 @@ class Launcher(QThread):
 
         file = file_work.FileLog()
 
+        core = ''
+        if platform.system() == "Windows":
+            if platform.architecture()[0] == "32bit":
+                core = "windows-x86"
+            else:
+                core = "windows-x64"
+        elif platform.system() == "Linux":
+            if platform.architecture()[0] == "32bit":
+                core = "linux-i386"
+            else:
+                core = "linux"
+        elif platform.system() == "Darwin":
+            if platform.machine() == "arm64":
+                core = "mac-os-arm64"
+            else:
+                core = "mac-os"
+
+        runtime = ''
+        if version.parse('1.20.6') <= version.parse(settings['version']) <= version.parse('1.21'):
+            runtime = 'java-runtime-delta'
+        elif version.parse('1.19') <= version.parse(settings['version']) <= version.parse('1.20.4'):
+            runtime = 'java-runtime-gamma'
+        elif version.parse('1.18') <= version.parse(settings['version']) <= version.parse('1.18.2'):
+            runtime = 'java-runtime-beta'
+        elif version.parse('1.17.1') == version.parse(settings['version']):
+            runtime = 'java-runtime-alpha'
+        elif version.parse('1.13.2') <= version.parse(settings['version']) <= version.parse('1.16.5'):
+            runtime = 'jre-legacy'
+
         minecraft_directory = settings['minecraft_directory']
         if file.read_version(minecraft_directory):
             file.write_version(minecraft_directory)
@@ -107,7 +138,7 @@ class Launcher(QThread):
                                                                    'setStatus': self.update_progress_label,
                                                                    'setProgress': self.update_progress,
                                                                    'setMax': self.update_progress_max},
-                                                                   java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
+                                                                   java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
                 self.progress = self.progress_max
                 self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
             elif settings['mods'] == "Fabric":
@@ -117,7 +148,7 @@ class Launcher(QThread):
                                                              'setStatus': self.update_progress_label,
                                                              'setProgress': self.update_progress,
                                                              'setMax': self.update_progress_max},
-                                                             java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
+                                                             java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
             elif settings['mods'] == "Qulit":
                 minecraft_launcher_lib.quilt.install_quilt(settings['version'],
                                                            settings['minecraft_directory'],
@@ -125,7 +156,7 @@ class Launcher(QThread):
                                                            'setStatus': self.update_progress_label,
                                                            'setProgress': self.update_progress,
                                                            'setMax': self.update_progress_max},
-                                                           java=f'{minecraft_directory}\\runtime\\jre-legacy\\windows-x64\\jre-legacy\\bin\\java.exe')
+                                                           java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
 
             self.state_signal.emit(False)
 
@@ -141,17 +172,17 @@ class Launcher(QThread):
                 options['jvmArguments'].append('-Dminecraft.api.session.host=https://invalid.invalid/')
                 options['jvmArguments'].append('-Dminecraft.api.services.host=https://invalid.invalid/')
 
-        version = ''
+        versions = ''
         if settings['mods'] == 'Vanilla':
-            version = settings['version']
+            versions = settings['version']
         elif settings['mods'] == "Forge":
-            version = minecraft_launcher_lib.forge.forge_to_installed_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']))
+            versions = minecraft_launcher_lib.forge.forge_to_installed_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']))
         elif settings['mods'] == 'Fabric':
-            version = self.split_fabric_version(settings['version'])
+            versions = self.split_fabric_version(settings['version'])
         elif settings['mods'] == 'Qulit':
-            version = self.split_qulit_version(settings['version'])
+            versions = self.split_qulit_version(settings['version'])
 
-        command = minecraft_launcher_lib.command.get_minecraft_command(version=version,
+        command = minecraft_launcher_lib.command.get_minecraft_command(version=versions,
                                                                        minecraft_directory=
                                                                        minecraft_directory,
                                                                        options=options)

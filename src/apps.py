@@ -169,7 +169,7 @@ class MainWindow(QWidget):
                     config.write(configfile)
 
                 self.update_message()
-        except requests.exceptions.RequestException:
+        except Exception:
             pass
 
     def update_version_list(self):
@@ -178,7 +178,6 @@ class MainWindow(QWidget):
         snapshot = self.snapshot_checkbox.isChecked()
 
         file_work.check_version_list()
-        #self.progress_bar.setVisible(False)
 
         if status.check_internet_connection():
             if self.choice_mod.currentText() == "Vanilla":
@@ -568,7 +567,7 @@ class MainWindow(QWidget):
         options['jvmArguments'].append(f'-Xmx{ram}M')
 
         if self.java_box.text() != "":
-            options['executablePath'] = os.path.join(self.java_box.text(), 'javaw.exe')
+            options['executablePath'] = os.path.join(self.java_box.text(), 'java.exe')
 
         settings['console'] = self.console_checkbox.isChecked()
         settings['alpha'] = self.alpha_checkbox.isChecked()
