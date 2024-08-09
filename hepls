@@ -1,6 +1,6 @@
 main.py:
 ===========================================================================================================================================================
-python -m nuitka --standalone --onefile --follow-imports --plugin-enable=pyqt6 --include-data-dir=C:\Users\ovcha\PycharmProjects\launcher_minecraft\\minecraft_launcher_lib=minecraft_launcher_lib --output-dir=output --output-filename=main.exe main.py
+python -m nuitka --standalone --onefile --follow-imports --plugin-enable=pyqt6 --include-data-dir=C:\Users\ovcha\launcher_minecraft\minecraft_launcher_lib=minecraft_launcher_lib --output-dir=output --output-filename=main.exe main.py
 ===========================================================================================================================================================
 
 update.py:
@@ -18,3 +18,15 @@ cd update
 python -m nuitka --standalone --onefile --follow-imports --plugin-enable=pyqt6 --output-dir=../An-Pan-Launcher --output-filename=upk.exe update.py
 cd ../An-Pan-Launcher
 deactivate
+
+certificate:
+openssl genpkey -algorithm RSA -out private.key
+openssl req -new -key private.key -out csr.pem
+openssl x509 -req -days 365 -in csr.pem -signkey private.key -out certificate.crt
+openssl pkcs12 -export -out certificate.pfx -inkey private.key -in certificate.crt
+
+certutil -addstore root "C:\Users\ovcha\ssl\certificate.crt"
+certutil -store root
+
+signtool sign /f "C:\Users\ovcha\ssl\certificate.pfx" /p "password" /td SHA256 /fd SHA256 /tr "http://timestamp.digicert.com" main.exe
+signtool verify /pa "main.exe"

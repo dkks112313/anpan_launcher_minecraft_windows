@@ -16,7 +16,7 @@ def create_or_no_new_config():
         config = configparser.ConfigParser()
         config.read("config.ini")
         config.add_section('CONFIG')
-        config['CONFIG']['username'] = "user"
+        config['CONFIG']['username'] = "User"
         config['CONFIG']['version'] = "1.21"
         config['CONFIG']['ram'] = "4096"
         config['CONFIG']['snapshot'] = "False"
@@ -45,7 +45,7 @@ def checker_config_params_to_exist():
         config['CONFIG'] = {}
 
     default_values = {
-        "username": "user",
+        "username": "User",
         "version": "latest",
         "ram": "4096",
         "snapshot": "False",

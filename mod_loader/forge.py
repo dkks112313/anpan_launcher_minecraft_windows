@@ -23,8 +23,8 @@ def ask_yes_no(text: str) -> bool:
 
 def split_forge_version(text):
     lists = text.split('-')
-    lists[0] += '-forge-'
-    lists[0] += lists[1]
+    lists[0] += '-forge1.9-'
+    lists[0] += lists[1]+'-1.9.0'
     return lists[0]
 
 
@@ -37,23 +37,27 @@ def main():
         print("This Minecraft version is not supported by forge")
         sys.exit(0)
 
-    if minecraft_launcher_lib.forge.supports_automatic_install(forge_version):
-        if ask_yes_no(f"Do you want to install forge {forge_version}?"):
-            minecraft_directory = minecraft_launcher_lib.utils.get_minecraft_directory()
-            callback = {
-                "setStatus": lambda text: print(text)
-            }
-            minecraft_launcher_lib.forge.install_forge_version(forge_version, minecraft_directory, callback=callback)
-    else:
+    if not minecraft_launcher_lib.forge.supports_automatic_install(forge_version):
         print(f"Forge {forge_version} can't be installed automatic.")
         if ask_yes_no("Do you want to run the installer?"):
-            minecraft_launcher_lib.forge.run_forge_installer(forge_version)
+            try:
+                minecraft_launcher_lib.forge.run_forge_installer(forge_version)
+            except Exception as e:
+                pass
 
-    command = minecraft_launcher_lib.command.get_minecraft_command(version=minecraft_launcher_lib.forge.forge_to_installed_version(forge_version),
-                                                                   minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
-                                                                   options=options)
+    if ask_yes_no(f"Do you want to install forge {forge_version}?"):
+        callback = {
+            "setStatus": lambda text: print(text)
+        }
+        minecraft_launcher_lib.forge.install_forge_version(forge_version,
+                                                           'C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
+                                                           callback=callback)
 
-    subprocess.Popen(command, creationflags=subprocess.CREATE_NO_WINDOW)
+    command = minecraft_launcher_lib.command.get_minecraft_command(
+            version=split_forge_version(forge_version),
+            minecraft_directory='C:\\Users\\ovcha\\AppData\\Roaming\\.minecraft',
+            options=options)
+    subprocess.Popen(command)
 
 
 if __name__ == "__main__":

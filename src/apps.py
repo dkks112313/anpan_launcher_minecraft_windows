@@ -8,7 +8,7 @@ import json
 
 import requests
 from packaging import version
-from PyQt6.QtCore import Qt, QProcess
+from PyQt6.QtCore import Qt, QProcess, QSettings
 from PyQt6.QtGui import QIntValidator, QPixmap, QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QHBoxLayout, QVBoxLayout, \
     QCheckBox, QFileDialog, QProgressBar, QMessageBox, QSlider
@@ -25,8 +25,31 @@ class MainWindow(QWidget):
         configer.checker_config_params_to_exist()
         config = configparser.ConfigParser()
         config.read('config.ini')
+
+        self.settings = QSettings('Launcher', 'Launcher')
+        os.makedirs('languages', exist_ok=True)
+        lang = os.listdir(os.path.join(os.getcwd(), 'languages'))
         self.language_select = QComboBox()
-        self.language_select.addItems(["English", "Ukraine"])
+        self.language_select.addItems(lang)
+        self.language_select.setCurrentIndex(int(self.settings.value("choice")))
+        self.line = []
+
+        self.msgBox = QMessageBox(self)
+        self.msgBox.setWindowTitle("Message")
+
+        self.path_label = QLabel("Path")
+        self.path_choice = QPushButton("Choice")
+        self.default_button = QPushButton("Default")
+        self.open_version_path = QPushButton("Open")
+        self.java_choice = QPushButton("Choice")
+        self.java_default = QPushButton("Default")
+        self.git_lable = QLabel("Auto Update")
+        self.warning_label = QLabel("Warning")
+        self.console_label = QLabel("Console")
+        self.data_label = QLabel("Data")
+        self.exit_label = QLabel("Exit")
+        self.language_label = QLabel("Language")
+        self.back_button = QPushButton("Back")
         self.settings_button = None
         self.launch_button = None
         self.progress_bar = None
@@ -129,14 +152,16 @@ class MainWindow(QWidget):
         """)
 
         bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(QLabel("Version:"))
+        self.version = QLabel("Version:")
+        bottom_layout.addWidget(self.version)
         bottom_layout.addWidget(self.version_select)
         bottom_layout.addWidget(self.choice_mod)
         bottom_layout.addWidget(self.launch_button)
         bottom_layout.addWidget(self.settings_button)
 
         user_layout = QHBoxLayout()
-        user_layout.addWidget(QLabel("Username:"))
+        self.username = QLabel("Username:")
+        user_layout.addWidget(self.username)
         user_layout.addWidget(self.username_edit)
 
         self.main_interface_layout.addStretch(1)
@@ -234,32 +259,33 @@ class MainWindow(QWidget):
                 self.version_select.addItem(version_item)
 
     def init_settings_interface(self):
+        self.change_language_select_main()
         settings_layout = QVBoxLayout()
 
         path = QHBoxLayout()
-        path_label = QLabel("Path")
-        path_choice = QPushButton("Choice")
-        path_choice.clicked.connect(self.select_directory)
-        default_button = QPushButton("Default")
-        default_button.clicked.connect(self.default_directory)
-        open_version_path = QPushButton("Open")
-        open_version_path.clicked.connect(self.open_directory)
-        path.addWidget(path_label)
+        #self.path_label = QLabel("Path")
+        #self.path_choice = QPushButton("Choice")
+        self.path_choice.clicked.connect(self.select_directory)
+        #self.default_button = QPushButton("Default")
+        self.default_button.clicked.connect(self.default_directory)
+        #self.open_version_path = QPushButton("Open")
+        self.open_version_path.clicked.connect(self.open_directory)
+        path.addWidget(self.path_label)
         path.addWidget(self.path_box)
-        path.addWidget(path_choice)
-        path.addWidget(default_button)
-        path.addWidget(open_version_path)
+        path.addWidget(self.path_choice)
+        path.addWidget(self.default_button)
+        path.addWidget(self.open_version_path)
 
         java = QHBoxLayout()
         java_label = QLabel("Java")
-        java_choice = QPushButton("Choice")
-        java_choice.clicked.connect(self.select_java)
-        java_default = QPushButton("Default")
-        java_default.clicked.connect(self.default_java)
+        #self.java_choice = QPushButton("Choice")
+        self.java_choice.clicked.connect(self.select_java)
+        #self.java_default = QPushButton("Default")
+        self.java_default.clicked.connect(self.default_java)
         java.addWidget(java_label)
         java.addWidget(self.java_box)
-        java.addWidget(java_choice)
-        java.addWidget(java_default)
+        java.addWidget(self.java_choice)
+        java.addWidget(self.java_default)
 
         ram = QHBoxLayout()
         ram_slider_label = QLabel(f"RAM(mb): ")
@@ -283,18 +309,18 @@ class MainWindow(QWidget):
         jvm.addWidget(self.jvm_box)
 
         git = QHBoxLayout()
-        git_lable = QLabel("Auto Update")
-        git.addWidget(git_lable)
+        #self.git_lable = QLabel("Auto Update")
+        git.addWidget(self.git_lable)
         git.addWidget(self.git_checkbox)
 
         warning = QHBoxLayout()
-        warning_label = QLabel("Warning")
-        warning.addWidget(warning_label)
+        #self.warning_label = QLabel("Warning")
+        warning.addWidget(self.warning_label)
         warning.addWidget(self.warning_checkbox)
 
         console = QHBoxLayout()
-        console_label = QLabel("Console")
-        console.addWidget(console_label)
+        #self.console_label = QLabel("Console")
+        console.addWidget(self.console_label)
         console.addWidget(self.console_checkbox)
 
         snapshot = QHBoxLayout()
@@ -308,22 +334,25 @@ class MainWindow(QWidget):
         alpha.addWidget(self.alpha_checkbox)
 
         data = QHBoxLayout()
-        data_label = QLabel("Data")
-        data.addWidget(data_label)
+        #self.data_label = QLabel("Data")
+        data.addWidget(self.data_label)
         data.addWidget(self.data_checkbox)
 
         exit_launcher = QHBoxLayout()
-        exit_label = QLabel("Exit")
-        exit_launcher.addWidget(exit_label)
+        #self.exit_label = QLabel("Exit")
+        exit_launcher.addWidget(self.exit_label)
         exit_launcher.addWidget(self.exit_checkbox)
 
         language = QHBoxLayout()
-        language_label = QLabel("Language")
-        language.addWidget(language_label)
+        #self.language_label = QLabel("Language")
+        language.addWidget(self.language_label)
         language.addWidget(self.language_select)
 
-        back_button = QPushButton("Back")
-        back_button.clicked.connect(self.show_main)
+        back = QHBoxLayout()
+        #self.back_button = QPushButton("Back")
+        self.back_button.clicked.connect(self.show_main)
+        back.addWidget(self.back_button)
+        self.language_select.currentIndexChanged.connect(self.change_language_select_main)
 
         settings_layout.addStretch(1)
         settings_layout.addLayout(path)
@@ -338,9 +367,67 @@ class MainWindow(QWidget):
         settings_layout.addLayout(alpha)
         settings_layout.addLayout(data)
         settings_layout.addLayout(exit_launcher)
-        settings_layout.addWidget(back_button)
+        settings_layout.addLayout(back)
 
         self.settings_interface.setLayout(settings_layout)
+
+    def change_language_select_main(self):
+        trans = os.listdir(os.path.join(os.getcwd(), 'languages'))
+        if trans == []:
+            trans.append('English')
+            trans.append('Ukraine')
+            eng = open(os.path.join(os.getcwd(), 'languages', 'English'), 'a', encoding="utf-8")
+            ukr = open(os.path.join(os.getcwd(), 'languages', 'Ukraine'), 'a', encoding="utf-8")
+            for index in range(26):
+                eng.writelines("???\n")
+                ukr.writelines("???\n")
+            eng.close()
+            ukr.close()
+            self.language_select.addItem('English')
+            self.language_select.addItem('Ukraine')
+            self.language_select.setCurrentIndex(0)
+
+        i = self.language_select.currentIndex()
+        self.language_select.blockSignals(True)
+        self.language_select.clear()
+        self.language_select.addItems(trans)
+        self.language_select.setCurrentIndex(i)
+        self.language_select.blockSignals(False)
+
+        with open(os.path.join(os.getcwd(), "languages", trans[i]), "r", encoding="utf-8") as translate:
+            self.line = translate.readlines()
+
+        if len(self.line) < 27:
+            for kip in range(27 - len(self.line)):
+                self.line.append("????")
+            self.line.append(" ")
+
+        self.username.setText(self.line[0][:-1])
+        self.version.setText(self.line[1][:-1])
+        self.launch_button.setText(self.line[2][:-1])
+        self.settings_button.setText(self.line[3][:-1])
+        self.path_label.setText(self.line[4][:-1])
+        self.path_choice.setText(self.line[5][:-1])
+        self.default_button.setText(self.line[6][:-1])
+        self.open_version_path.setText(self.line[7][:-1])
+        self.java_choice.setText(self.line[8][:-1])
+        self.java_default.setText(self.line[9][:-1])
+        self.language_label.setText(self.line[10][:-1])
+        self.git_lable.setText(self.line[11][:-1])
+        self.warning_label.setText(self.line[12][:-1])
+        self.console_label.setText(self.line[13][:-1])
+        self.data_label.setText(self.line[14][:-1])
+        self.exit_label.setText(self.line[15][:-1])
+        self.back_button.setText(self.line[16][:-1])
+        self.msgBox.setWindowTitle(self.line[17][:-1])
+
+        '''
+        self.language_select.blockSignals(True)
+        self.language_select.clear()
+        self.language_select.addItem(self.line[24][:-1])
+        self.language_select.addItem(self.line[25][:-1])
+        self.language_select.setCurrentIndex(i)
+        self.language_select.blockSignals(False)'''
 
     def update_line_edit(self, value):
         self.ram_box.blockSignals(True)
@@ -360,10 +447,10 @@ class MainWindow(QWidget):
         sys.exit()
 
     def update_message(self):
-        self.msgBox = QMessageBox(self)
+        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
-        self.msgBox.setText("You want to update?")
-        self.msgBox.setWindowTitle("Message")
+        self.msgBox.setText(self.line[18][:-1])
+        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
 
@@ -379,30 +466,30 @@ class MainWindow(QWidget):
             self.run_update()
 
     def warning_message(self, user_message):
-        self.msgBox = QMessageBox(self)
+        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         button_adapt = self.msgBox.button(QMessageBox.StandardButton.Ok)
-        button_adapt.setText("Change username")
+        button_adapt.setText(self.line[19][:-1])
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
     def show_message(self, user_message):
-        self.msgBox = QMessageBox(self)
+        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
     def show_launch_message(self, user_message):
-        self.msgBox = QMessageBox(self)
+        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        self.msgBox.setWindowTitle("Message")
+        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.buttonClicked.connect(self.on_message_box_close)
@@ -445,7 +532,7 @@ class MainWindow(QWidget):
         if os.path.isdir(self.path_box.text() + '\\' + self.version_select.currentText()):
             subprocess.Popen("explorer " + self.path_box.text() + '\\' + self.version_select.currentText(), creationflags=subprocess.CREATE_NO_WINDOW)
         else:
-            self.show_message("Directory not exist")
+            self.show_message(self.line[20][:-1])
 
     def load_settings(self):
         configer.create_or_no_new_config()
@@ -521,6 +608,7 @@ class MainWindow(QWidget):
 
     def closeEvent(self, event):
         self.save_config()
+        self.settings.setValue("choice", self.language_select.currentIndex())
         request.on_close()
         event.accept()
 
@@ -528,7 +616,7 @@ class MainWindow(QWidget):
         self.launch_button.setDisabled(value)
 
         if self.launcher.status:
-            self.show_launch_message("Minecraft is installed and starts")
+            self.show_launch_message(self.line[21][:-1])
             self.progress_bar.setVisible(False)
             time.sleep(5)
             self.launcher.status = False
@@ -548,7 +636,7 @@ class MainWindow(QWidget):
         options["username"] = self.username_edit.text()
 
         if not regex.check_to_latin_alphabet(options["username"]) and self.warning_checkbox.isChecked():
-            self.warning_message("Your name contains symbols that may interfere with your future game")
+            self.warning_message(self.line[22][:-1])
             return
 
         if status.check_internet_connection():
@@ -580,35 +668,38 @@ class MainWindow(QWidget):
             if settings['mods'] == 'Forge':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
                     if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
-                        self.show_message("Minecraft is starting")
+                        self.show_message(self.line[23][:-1])
             elif settings['mods'] == 'Fabric':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
                     if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
-                        self.show_message("Minecraft is starting")
+                        self.show_message(self.line[23][:-1])
             elif settings['mods'] == 'Qulit':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
                     if os.path.isdir(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
-                        self.show_message("Minecraft is starting")
+                        self.show_message(self.line[23][:-1])
             else:
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
                     if os.path.isdir(settings['minecraft_directory'] + '\\' + settings['version']):
-                        self.show_message("Minecraft is starting")
+                        self.show_message(self.line[23][:-1])
         else:
             if settings['mods'] == 'Forge':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}'):
-                    self.show_message("Minecraft is starting")
+                    self.show_message(self.line[23][:-1])
             elif settings['mods'] == 'Fabric':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}'):
-                    self.show_message("Minecraft is starting")
+                    self.show_message(self.line[23][:-1])
             elif settings['mods'] == 'Qulit':
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}'):
-                    self.show_message("Minecraft is starting")
+                    self.show_message(self.line[23][:-1])
             else:
                 if file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']):
-                    self.show_message("Minecraft is starting")
+                    self.show_message(self.line[23][:-1])
 
         self.launcher.start()
 
-        if self.exit_checkbox.isChecked() and file_work.read_version_and_check(
-                settings['minecraft_directory'] + '\\' + settings['version']):
+        if (self.exit_checkbox.isChecked() and
+                (file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Forge {settings['version']}') or
+                file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Fabric {settings['version']}') or
+                file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + f'Qulit {settings['version']}') or
+                file_work.read_version_and_check(settings['minecraft_directory'] + '\\' + settings['version']))):
             self.close()

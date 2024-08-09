@@ -175,7 +175,7 @@ def run_forge_installer(version: str, java: Optional[Union[str, os.PathLike]] = 
         raise VersionNotFound(version)
 
     try:
-        subprocess.run(["java" if java is None else str(java), "-jar", temp_file_path], check=True)
+        subprocess.run(["java" if java is None else str(java), "-jar", temp_file_path], check=True, creationflags=subprocess.CREATE_NO_WINDOW)
     finally:
         os.remove(temp_file_path)
 

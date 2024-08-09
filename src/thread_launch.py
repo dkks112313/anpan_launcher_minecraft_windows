@@ -2,6 +2,7 @@ import os
 import subprocess
 import minecraft_launcher_lib
 import platform
+import json
 from packaging import version
 
 from PyQt6.QtCore import QThread, QWaitCondition, QMutex, pyqtSignal
@@ -37,21 +38,16 @@ class Launcher(QThread):
         self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
 
     @staticmethod
-    def split_forge_version(text):
-        lists = text.split('-')
-        lists[0] += '-forge-'
-        lists[0] += lists[1]
-        return lists[0]
+    def find_longest_filename(dir):
+        longest_filename = ""
+        max_length = 0
 
-    @staticmethod
-    def split_fabric_version(text):
-        fabric = 'fabric-loader-' + minecraft_launcher_lib.fabric.get_latest_loader_version() + '-' + text
-        return fabric
+        for filename in os.listdir(dir):
+            if len(filename) > max_length:
+                longest_filename = filename
+                max_length = len(filename)
 
-    @staticmethod
-    def split_qulit_version(text):
-        qulit = 'quilt-loader-' + minecraft_launcher_lib.quilt.get_latest_loader_version() + '-' + text
-        return qulit
+        return longest_filename
 
     def run(self):
         self.state_signal.emit(True)
@@ -115,7 +111,7 @@ class Launcher(QThread):
             runtime = 'java-runtime-beta'
         elif version.parse('1.17.1') == version.parse(settings['version']):
             runtime = 'java-runtime-alpha'
-        elif version.parse('1.13.2') <= version.parse(settings['version']) <= version.parse('1.16.5'):
+        elif version.parse('1.1') <= version.parse(settings['version']) <= version.parse('1.16.5'):
             runtime = 'jre-legacy'
 
         minecraft_directory = settings['minecraft_directory']
@@ -127,35 +123,53 @@ class Launcher(QThread):
                                                                          minecraft_directory=
                                                                          settings['minecraft_directory'],
                                                                          callback={
-                                                                         'setStatus': self.update_progress_label,
-                                                                         'setProgress': self.update_progress,
-                                                                         'setMax': self.update_progress_max})
+                                                                             'setStatus': self.update_progress_label,
+                                                                             'setProgress': self.update_progress,
+                                                                             'setMax': self.update_progress_max})
                 folder.moving_folder_resources()
             elif settings['mods'] == "Forge":
-                minecraft_launcher_lib.forge.install_forge_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']),
+                vers = minecraft_launcher_lib.forge.find_forge_version(settings['version'])
+                if version.parse('1.1') <= version.parse(settings['version']) <= version.parse('1.12.1'):
+                    os.makedirs(minecraft_directory, exist_ok=True)
+                    data = {
+                        "clientToken": "f31f3299-7ead-4649-802d-14e7608bfc59",
+                        "profiles": {}
+                    }
+
+                    if not os.path.isfile(f'{minecraft_directory}\\launcher_profiles.json'):
+                        with open(f'{minecraft_directory}\\launcher_profiles.json', 'a') as file:
+                            json.dump(data, file, indent=4)
+
+                    try:
+                        minecraft_launcher_lib.forge.run_forge_installer(vers)
+                    except Exception as e:
+                        pass
+
+                minecraft_launcher_lib.forge.install_forge_version(vers,
                                                                    settings['minecraft_directory'],
                                                                    callback={
-                                                                   'setStatus': self.update_progress_label,
-                                                                   'setProgress': self.update_progress,
-                                                                   'setMax': self.update_progress_max},
+                                                                       'setStatus': self.update_progress_label,
+                                                                       'setProgress': self.update_progress,
+                                                                       'setMax': self.update_progress_max},
                                                                    java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
+
                 self.progress = self.progress_max
                 self.progress_signal.emit(self.progress, self.progress_max, self.progress_label)
             elif settings['mods'] == "Fabric":
                 minecraft_launcher_lib.fabric.install_fabric(settings['version'],
                                                              settings['minecraft_directory'],
                                                              callback={
-                                                             'setStatus': self.update_progress_label,
-                                                             'setProgress': self.update_progress,
-                                                             'setMax': self.update_progress_max},
+                                                                 'setStatus': self.update_progress_label,
+                                                                 'setProgress': self.update_progress,
+                                                                 'setMax': self.update_progress_max},
                                                              java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
             elif settings['mods'] == "Qulit":
                 minecraft_launcher_lib.quilt.install_quilt(settings['version'],
                                                            settings['minecraft_directory'],
                                                            callback={
-                                                           'setStatus': self.update_progress_label,
-                                                           'setProgress': self.update_progress,
-                                                           'setMax': self.update_progress_max},
+                                                               'setStatus': self.update_progress_label,
+                                                               'setProgress': self.update_progress,
+                                                               'setMax': self.update_progress_max},
                                                            java=f'{minecraft_directory}\\runtime\\{runtime}\\{core}\\{runtime}\\bin\\java.exe')
 
             self.state_signal.emit(False)
@@ -175,12 +189,8 @@ class Launcher(QThread):
         versions = ''
         if settings['mods'] == 'Vanilla':
             versions = settings['version']
-        elif settings['mods'] == "Forge":
-            versions = minecraft_launcher_lib.forge.forge_to_installed_version(minecraft_launcher_lib.forge.find_forge_version(settings['version']))
-        elif settings['mods'] == 'Fabric':
-            versions = self.split_fabric_version(settings['version'])
-        elif settings['mods'] == 'Qulit':
-            versions = self.split_qulit_version(settings['version'])
+        elif settings['mods'] == "Forge" or settings['mods'] == 'Fabric' or settings['mods'] == 'Qulit':
+            versions = self.find_longest_filename(os.path.join(minecraft_directory, 'versions'))
 
         command = minecraft_launcher_lib.command.get_minecraft_command(version=versions,
                                                                        minecraft_directory=
