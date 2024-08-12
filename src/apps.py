@@ -31,6 +31,7 @@ class MainWindow(QWidget):
         lang = os.listdir(os.path.join(os.getcwd(), 'languages'))
         self.language_select = QComboBox()
         self.language_select.addItems(lang)
+        self.settings.setValue("choice", self.language_select.currentIndex())
         self.language_select.setCurrentIndex(int(self.settings.value("choice")))
         self.line = []
 

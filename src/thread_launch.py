@@ -1,5 +1,8 @@
 import os
+import shutil
 import subprocess
+import time
+
 import minecraft_launcher_lib
 import platform
 import json
@@ -103,16 +106,53 @@ class Launcher(QThread):
                 core = "mac-os"
 
         runtime = ''
-        if version.parse('1.20.6') <= version.parse(settings['version']) <= version.parse('1.21'):
-            runtime = 'java-runtime-delta'
-        elif version.parse('1.19') <= version.parse(settings['version']) <= version.parse('1.20.4'):
-            runtime = 'java-runtime-gamma'
-        elif version.parse('1.18') <= version.parse(settings['version']) <= version.parse('1.18.2'):
-            runtime = 'java-runtime-beta'
-        elif version.parse('1.17.1') == version.parse(settings['version']):
-            runtime = 'java-runtime-alpha'
-        elif version.parse('1.1') <= version.parse(settings['version']) <= version.parse('1.16.5'):
-            runtime = 'jre-legacy'
+        if settings['mods'] == 'Forge':
+            if version.parse('1.20.6') <= version.parse(settings['version']) <= version.parse('1.21'):
+                runtime = 'java-runtime-delta'
+            elif version.parse('1.19') <= version.parse(settings['version']) <= version.parse('1.20.4'):
+                runtime = 'java-runtime-gamma'
+            elif version.parse('1.18') <= version.parse(settings['version']) <= version.parse('1.18.2'):
+                runtime = 'java-runtime-beta'
+            elif version.parse('1.17.1') == version.parse(settings['version']):
+                runtime = 'java-runtime-alpha'
+            elif version.parse('1.1') <= version.parse(settings['version']) <= version.parse('1.16.5'):
+                runtime = 'jre-legacy'
+        elif settings['mods'] == 'Fabric':
+            with open('version_fabric.json', 'r', encoding='utf-8') as f:
+                fabric = json.load(f)
+
+            list_fabric = []
+            for fab in fabric:
+                list_fabric.append(fab['version'])
+
+            if settings['version'] in list_fabric[:41]:
+                runtime = 'java-runtime-delta'
+            elif settings['version'] in list_fabric[41:145]:
+                runtime = 'java-runtime-gamma'
+            elif settings['version'] in list_fabric[145:188]:
+                runtime = 'java-runtime-beta'
+            elif settings['version'] in list_fabric[188:219]:
+                runtime = 'java-runtime-alpha'
+            elif settings['version'] in list_fabric[219:]:
+                runtime = 'jre-legacy'
+        elif settings['mods'] == 'Qulit':
+            with open('version_qulit.json', 'r', encoding='utf-8') as f:
+                qulit = json.load(f)
+
+            list_qulit = []
+            for qul in qulit:
+                list_qulit.append(qul['version'])
+
+            if settings['version'] in list_qulit[:40]:
+                runtime = 'java-runtime-delta'
+            elif settings['version'] in list_qulit[40:143]:
+                runtime = 'java-runtime-gamma'
+            elif settings['version'] in list_qulit[143:178]:
+                runtime = 'java-runtime-beta'
+            elif settings['version'] in list_qulit[178:209]:
+                runtime = 'java-runtime-alpha'
+            elif settings['version'] in list_qulit[209:]:
+                runtime = 'jre-legacy'
 
         minecraft_directory = settings['minecraft_directory']
         if file.read_version(minecraft_directory):
@@ -136,14 +176,24 @@ class Launcher(QThread):
                         "profiles": {}
                     }
 
-                    if not os.path.isfile(f'{minecraft_directory}\\launcher_profiles.json'):
-                        with open(f'{minecraft_directory}\\launcher_profiles.json', 'a') as file:
+                    os.makedirs(f'{os.getenv('APPDATA')}\\.minecraft', exist_ok=True)
+
+                    if not os.path.isfile(f'{os.getenv('APPDATA')}\\.minecraft\\launcher_profiles.json'):
+                        with open(f'{os.getenv('APPDATA')}\\.minecraft\\launcher_profiles.json', 'a') as file:
                             json.dump(data, file, indent=4)
+
+                    if os.path.exists(f'{os.getenv('APPDATA')}\\.minecraft\\libraries'):
+                        shutil.rmtree(f'{os.getenv('APPDATA')}\\.minecraft\\libraries')
+                    if os.path.exists(f'{os.getenv('APPDATA')}\\.minecraft\\versions'):
+                        shutil.rmtree(f'{os.getenv('APPDATA')}\\.minecraft\\versions')
 
                     try:
                         minecraft_launcher_lib.forge.run_forge_installer(vers)
+                        shutil.move(f'{os.getenv('APPDATA')}\\.minecraft\\libraries', f'{minecraft_directory}')
+                        shutil.move(f'{os.getenv('APPDATA')}\\.minecraft\\versions', f'{minecraft_directory}')
                     except Exception as e:
                         pass
+                    time.sleep(2)
 
                 minecraft_launcher_lib.forge.install_forge_version(vers,
                                                                    settings['minecraft_directory'],
