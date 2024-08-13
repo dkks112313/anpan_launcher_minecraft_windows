@@ -242,6 +242,22 @@ class Launcher(QThread):
         elif settings['mods'] == "Forge" or settings['mods'] == 'Fabric' or settings['mods'] == 'Qulit':
             versions = self.find_longest_filename(os.path.join(minecraft_directory, 'versions'))
 
+            if version.parse('1.1') <= version.parse(settings['version']) <= version.parse('1.12.1'):
+                dir = os.path.join(minecraft_directory, 'versions')
+                dirs_list = os.listdir(dir)
+                sorted_dirs = sorted(dirs_list, key=len, reverse=True)
+                max_element = sorted_dirs[0]
+                if os.path.isfile(os.path.join(dir, max_element, f'{max_element}.json')):
+                    os.remove(os.path.join(dir, max_element, f'{max_element}.json'))
+                json_dir = sorted_dirs[1]
+                json_files = os.listdir(os.path.join(dir, json_dir))
+
+                if json_files:
+                    json_file = json_files[0]
+                    shutil.copy(os.path.join(dir, json_dir, json_file), os.path.join(dir, max_element))
+                    os.rename(os.path.join(dir, max_element, json_file),
+                              os.path.join(dir, max_element, f'{max_element}.json'))
+
         command = minecraft_launcher_lib.command.get_minecraft_command(version=versions,
                                                                        minecraft_directory=
                                                                        minecraft_directory,

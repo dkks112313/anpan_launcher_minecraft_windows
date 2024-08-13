@@ -23,8 +23,8 @@ def ask_yes_no(text: str) -> bool:
 
 def split_forge_version(text):
     lists = text.split('-')
-    lists[0] += '-forge1.9-'
-    lists[0] += lists[1]+'-1.9.0'
+    lists[0] += '-forge1.12-'
+    lists[0] += lists[1]
     return lists[0]
 
 
