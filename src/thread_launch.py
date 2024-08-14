@@ -107,7 +107,7 @@ class Launcher(QThread):
 
         runtime = ''
         if settings['mods'] == 'Forge':
-            if version.parse('1.20.6') <= version.parse(settings['version']) <= version.parse('1.21'):
+            if version.parse('1.20.6') <= version.parse(settings['version']) <= version.parse('1.21.1'):
                 runtime = 'java-runtime-delta'
             elif version.parse('1.19') <= version.parse(settings['version']) <= version.parse('1.20.4'):
                 runtime = 'java-runtime-gamma'
@@ -125,15 +125,15 @@ class Launcher(QThread):
             for fab in fabric:
                 list_fabric.append(fab['version'])
 
-            if settings['version'] in list_fabric[:41]:
+            if settings['version'] in list_fabric[:42]:
                 runtime = 'java-runtime-delta'
-            elif settings['version'] in list_fabric[41:145]:
+            elif settings['version'] in list_fabric[42:146]:
                 runtime = 'java-runtime-gamma'
-            elif settings['version'] in list_fabric[145:188]:
+            elif settings['version'] in list_fabric[146:189]:
                 runtime = 'java-runtime-beta'
-            elif settings['version'] in list_fabric[188:219]:
+            elif settings['version'] in list_fabric[189:220]:
                 runtime = 'java-runtime-alpha'
-            elif settings['version'] in list_fabric[219:]:
+            elif settings['version'] in list_fabric[220:]:
                 runtime = 'jre-legacy'
         elif settings['mods'] == 'Qulit':
             with open('version_qulit.json', 'r', encoding='utf-8') as f:
@@ -143,15 +143,15 @@ class Launcher(QThread):
             for qul in qulit:
                 list_qulit.append(qul['version'])
 
-            if settings['version'] in list_qulit[:40]:
+            if settings['version'] in list_qulit[:41]:
                 runtime = 'java-runtime-delta'
-            elif settings['version'] in list_qulit[40:143]:
+            elif settings['version'] in list_qulit[41:144]:
                 runtime = 'java-runtime-gamma'
-            elif settings['version'] in list_qulit[143:178]:
+            elif settings['version'] in list_qulit[144:179]:
                 runtime = 'java-runtime-beta'
-            elif settings['version'] in list_qulit[178:209]:
+            elif settings['version'] in list_qulit[179:210]:
                 runtime = 'java-runtime-alpha'
-            elif settings['version'] in list_qulit[209:]:
+            elif settings['version'] in list_qulit[210:]:
                 runtime = 'jre-legacy'
 
         minecraft_directory = settings['minecraft_directory']

@@ -1,3 +1,4 @@
+import os.path
 import sys
 import time
 import json
@@ -27,6 +28,14 @@ def load_last_execution_time():
 
 
 def perform_task():
+    if os.path.isfile(f'{os.path.join(os.getcwd(), 'version_vanilla.json')}'):
+        os.remove(f'{os.path.join(os.getcwd(), 'version_vanilla.json')}')
+    if os.path.isfile(f'{os.path.join(os.getcwd(), 'version_forge.json')}'):
+        os.remove(f'{os.path.join(os.getcwd(), 'version_forge.json')}')
+    if os.path.isfile(f'{os.path.join(os.getcwd(), 'version_fabric.json')}'):
+        os.remove(f'{os.path.join(os.getcwd(), 'version_fabric.json')}')
+    if os.path.isfile(f'{os.path.join(os.getcwd(), 'version_qulit.json')}'):
+        os.remove(f'{os.path.join(os.getcwd(), 'version_qulit.json')}')
     checking_json()
     save_last_execution_time()
 
@@ -55,16 +64,6 @@ def checking_json():
     for version_info in minecraft_launcher_lib.utils.get_version_list():
         if minecraft_launcher_lib.forge.find_forge_version(version_info['id']):
             version_forge.append(split_forge(minecraft_launcher_lib.forge.find_forge_version(version_info['id'])))
-    '''for version_info in minecraft_launcher_lib.forge.list_forge_versions():
-        app = ''
-        for i in version_info:
-            if i == '-':
-                break
-            else:
-                app += i
-
-        if not (version.parse('1.1') <= version.parse(app) <= version.parse('1.12.2')):
-            version_forge.append(version_info)'''
 
     version_fabric = []
     for i in minecraft_launcher_lib.fabric.get_all_minecraft_versions():
