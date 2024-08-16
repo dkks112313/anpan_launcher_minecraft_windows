@@ -264,12 +264,8 @@ class MainWindow(QWidget):
         settings_layout = QVBoxLayout()
 
         path = QHBoxLayout()
-        #self.path_label = QLabel("Path")
-        #self.path_choice = QPushButton("Choice")
         self.path_choice.clicked.connect(self.select_directory)
-        #self.default_button = QPushButton("Default")
         self.default_button.clicked.connect(self.default_directory)
-        #self.open_version_path = QPushButton("Open")
         self.open_version_path.clicked.connect(self.open_directory)
         path.addWidget(self.path_label)
         path.addWidget(self.path_box)
@@ -279,9 +275,7 @@ class MainWindow(QWidget):
 
         java = QHBoxLayout()
         java_label = QLabel("Java")
-        #self.java_choice = QPushButton("Choice")
         self.java_choice.clicked.connect(self.select_java)
-        #self.java_default = QPushButton("Default")
         self.java_default.clicked.connect(self.default_java)
         java.addWidget(java_label)
         java.addWidget(self.java_box)
@@ -310,17 +304,14 @@ class MainWindow(QWidget):
         jvm.addWidget(self.jvm_box)
 
         git = QHBoxLayout()
-        #self.git_lable = QLabel("Auto Update")
         git.addWidget(self.git_lable)
         git.addWidget(self.git_checkbox)
 
         warning = QHBoxLayout()
-        #self.warning_label = QLabel("Warning")
         warning.addWidget(self.warning_label)
         warning.addWidget(self.warning_checkbox)
 
         console = QHBoxLayout()
-        #self.console_label = QLabel("Console")
         console.addWidget(self.console_label)
         console.addWidget(self.console_checkbox)
 
@@ -335,22 +326,18 @@ class MainWindow(QWidget):
         alpha.addWidget(self.alpha_checkbox)
 
         data = QHBoxLayout()
-        #self.data_label = QLabel("Data")
         data.addWidget(self.data_label)
         data.addWidget(self.data_checkbox)
 
         exit_launcher = QHBoxLayout()
-        #self.exit_label = QLabel("Exit")
         exit_launcher.addWidget(self.exit_label)
         exit_launcher.addWidget(self.exit_checkbox)
 
         language = QHBoxLayout()
-        #self.language_label = QLabel("Language")
         language.addWidget(self.language_label)
         language.addWidget(self.language_select)
 
         back = QHBoxLayout()
-        #self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.show_main)
         back.addWidget(self.back_button)
         self.language_select.currentIndexChanged.connect(self.change_language_select_main)
@@ -422,14 +409,6 @@ class MainWindow(QWidget):
         self.back_button.setText(self.line[16][:-1])
         self.msgBox.setWindowTitle(self.line[17][:-1])
 
-        '''
-        self.language_select.blockSignals(True)
-        self.language_select.clear()
-        self.language_select.addItem(self.line[24][:-1])
-        self.language_select.addItem(self.line[25][:-1])
-        self.language_select.setCurrentIndex(i)
-        self.language_select.blockSignals(False)'''
-
     def update_line_edit(self, value):
         self.ram_box.blockSignals(True)
         self.ram_box.setText(str(value * 100))
@@ -448,10 +427,8 @@ class MainWindow(QWidget):
         sys.exit()
 
     def update_message(self):
-        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(self.line[18][:-1])
-        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
 
@@ -467,10 +444,8 @@ class MainWindow(QWidget):
             self.run_update()
 
     def warning_message(self, user_message):
-        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         button_adapt = self.msgBox.button(QMessageBox.StandardButton.Ok)
         button_adapt.setText(self.line[19][:-1])
@@ -478,19 +453,15 @@ class MainWindow(QWidget):
         self.msgBox.exec()
 
     def show_message(self, user_message):
-        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.exec()
 
     def show_launch_message(self, user_message):
-        #self.msgBox = QMessageBox(self)
         self.msgBox.setIcon(QMessageBox.Icon.Information)
         self.msgBox.setText(user_message)
-        #self.msgBox.setWindowTitle("Message")
         self.msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         self.msgBox.setWindowModality(Qt.WindowModality.ApplicationModal)
         self.msgBox.buttonClicked.connect(self.on_message_box_close)
